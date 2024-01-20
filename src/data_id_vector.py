@@ -16,8 +16,8 @@ def check_for_id_matrix(df):
 
     # Iterate columns of df, add cols with unique value count = row count to concern list
     for col in df.columns:
-        if df[col].nuqniue == df_rows:
-            print(f'{col} has {df[col].nuqniue} unique rows of datatype: {df[col].dtype}')    
+        if df[col].nunique == df_rows:
+            print(f'{col} has {df[col].nunique} unique rows of datatype: {df[col].dtype}')    
             concern_list.append[col]
 
     # If concern list not emmpty dispaly list contents
