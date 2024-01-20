@@ -25,7 +25,9 @@ def get_date_from_source() -> pd.DataFrame:
         Make sure the data directory exists before executing this function!
     '''
     # url to data
-    url = "https://www.openml.org/data/download/150675/BNG_wine.arff"
+    url = "https://www.kaggle.com/datasets/muratkokludataset/dry-bean-dataset#:~:text=insert_drive_file-,Dry_Bean_Dataset,-.arff"
+
+    
 
     # open the open
     data_stream = urlopen(url)
@@ -37,3 +39,5 @@ def get_date_from_source() -> pd.DataFrame:
     df = pd.DataFrame(data)
 
     return df
+
+df = get_date_from_source()
