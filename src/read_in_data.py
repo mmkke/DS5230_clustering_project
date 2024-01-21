@@ -25,7 +25,7 @@ def read_data() -> pd.DataFrame:
         Make sure the data directory exists before executing this function!
     '''
     # set path to arff file in data folder
-    file_relative_path = '/data/DryBeanDataset/Dry_Bean_Dataset.arff'
+    file_relative_path = '/data/raw/Dry_Bean_Dataset.arff'
     
     path = Path(os.getcwd())
     print(path)
