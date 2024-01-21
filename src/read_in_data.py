@@ -5,7 +5,7 @@
     Northeastern University
     Steven Morin, PhD
 
-    This file contains a function that will read in the data from the arff file that stored in the data folder.
+    This file contains a function that will read in the data from the .arff file that stored in the data folder.
 '''
 from scipy.io import arff
 import pandas as pd

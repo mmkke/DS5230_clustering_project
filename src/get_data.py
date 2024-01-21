@@ -17,7 +17,7 @@ def get_date_from_source() -> pd.DataFrame:
         Function: get_date_from_source
         Parameters: None
         Returns: 1 pd.DataFrame
-            df: wine data
+            df: beans data
 
         This function will access the wine data set BNG(wine) (ID:1185) from the OpenML url. This file is stored as .arff file.
         This function will import the .arff file create and return a pd.DataFrame.

@@ -1,3 +1,13 @@
+'''
+    Final Project
+    Joseph Nelson Farrell & Michael Missone
+    DS 5230 Unsupervised Machine Learning
+    Northeastern University
+    Steven Morin, PhD
+
+    This file contains a function that will if a pd.Dataframe as an ID attribute.
+'''
+
 def check_for_id_matrix(df):
     '''
     Checks dataframe for potential ID column. Returns list of 
