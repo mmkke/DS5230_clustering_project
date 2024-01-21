@@ -9,6 +9,9 @@
 '''
 from scipy.io import arff
 import pandas as pd
+import os
+import sys
+from pathlib import Path
 
 def read_data() -> pd.DataFrame:
     '''
@@ -22,12 +25,21 @@ def read_data() -> pd.DataFrame:
         Make sure the data directory exists before executing this function!
     '''
     # set path to arff file in data folder
-    path_to_data = '/Users/nelsonfarrell/Documents/Northeastern/5230/final_project/DS5230-final/data/DryBeanDataset/Dry_Bean_Dataset.arff'
+    file_relative_path = '/data/DryBeanDataset/Dry_Bean_Dataset.arff'
+    
+    path = Path(os.getcwd())
+    print(path)
+    path = str(path.parent)
+    data_path = path + file_relative_path
+    print(data_path)
 
     # load file
-    data, meta = arff.loadarff(path_to_data)
+    data, meta = arff.loadarff(data_path)
 
     # convert to df
     df = pd.DataFrame(data)
 
     return df
+
+df = read_data()
+df.head()
