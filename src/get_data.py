@@ -27,8 +27,6 @@ def get_date_from_source() -> pd.DataFrame:
     # url to data
     url = "https://www.kaggle.com/datasets/muratkokludataset/dry-bean-dataset#:~:text=insert_drive_file-,Dry_Bean_Dataset,-.arff"
 
-    
-
     # open the open
     data_stream = urlopen(url)
 

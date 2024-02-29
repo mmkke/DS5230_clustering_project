@@ -40,6 +40,3 @@ def read_data() -> pd.DataFrame:
     df = pd.DataFrame(data)
 
     return df
-
-df = read_data()
-df.head()
