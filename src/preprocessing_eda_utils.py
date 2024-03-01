@@ -141,6 +141,7 @@ def generate_column_hist(df: pd.DataFrame, columns: list) -> None:
         ax.set_ylabel('Count', weight = 'bold', style = 'italic')
     
     return None
+
 ####################################################################################################################
 ####################################################################################################################
 def sub_divide_pairplot(trans_df, alpha):
