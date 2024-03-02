@@ -146,6 +146,13 @@ def generate_column_hist(df: pd.DataFrame, columns: list) -> None:
 ####################################################################################################################
 def sub_divide_pairplot(trans_df, alpha):
 
+
+    # plot params
+    plt.rcParams['figure.facecolor'] = 'white'
+    plt.rcParams['axes.facecolor'] = 'lightblue'
+    plt.rcParams['axes.edgecolor'] = 'black'
+    plt.rcParams['lines.color'] = 'white'
+
     columns = trans_df.columns
 
     for i in [0, 4, 8, 12]:
