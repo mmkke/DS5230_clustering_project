@@ -9,6 +9,7 @@
 '''
 import pandas as pd
 import numpy as np
+import itertools
 import matplotlib.pyplot as plt
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 
@@ -144,8 +145,15 @@ def generate_column_hist(df: pd.DataFrame, columns: list) -> None:
 
 ####################################################################################################################
 ####################################################################################################################
-def sub_divide_pairplot(trans_df, alpha):
+def sub_divide_pairplot(trans_df):
+    '''
+        Function: sub_divide_pairplot
+        Parameters: 1 pd.DataFrame
+            trans_df: a pandas dataframe design matrix
+        Returns: None
 
+        This functions will create 4x4 plt subplots of all pairplots from a attribute matrix with 16 attributes. 
+    '''
 
     # plot params
     plt.rcParams['figure.facecolor'] = 'white'
@@ -153,28 +161,29 @@ def sub_divide_pairplot(trans_df, alpha):
     plt.rcParams['axes.edgecolor'] = 'black'
     plt.rcParams['lines.color'] = 'white'
 
-    columns = trans_df.columns
+    # Get all combinations of length 2 (pairs)
+    pairs = list(itertools.product(trans_df.columns, repeat=2))
 
-    for i in [0, 4, 8, 12]:
+    # Iterate through the list, selecting 8 pairs at a time
+    for i in range(0, len(pairs), 16): 
+        selected_pairs = pairs[i:i+16]
+        fig, axes = plt.subplots(4, 4, figsize=(16, 16))
 
-        # 4x4 subset of variables for the pairplot 
-        subset_cols = columns[i: (i + 4)]
+        for idx, pair in enumerate(selected_pairs):
+            row = idx // 4
+            col = idx % 4
+            ax = axes[row, col]
+            if pair[0] == pair[1]:
+                ax.hist(trans_df[pair[0]], color = 'firebrick',edgecolor = 'white', bins='auto')
+                ax.set_xlabel(pair[0].split("_")[2])
+                ax.set_ylabel(pair[1].split("_")[2])
+            else:
+                ax.scatter(trans_df[pair[0]], trans_df[pair[1]], alpha=0.8, color = 'firebrick', edgecolor = 'white')
+                ax.set_xlabel(pair[0].split("_")[2])
+                ax.set_ylabel(pair[1].split("_")[2])
 
-        fig, axs = plt.subplots(len(subset_cols), len(subset_cols), figsize=(15, 15))
-
-        for i, col1 in enumerate(subset_cols):
-            for j, col2 in enumerate(subset_cols):
-                if i == j:
-
-                    # histograms on diagonals
-                    axs[i, j].hist(trans_df[col1], bins='auto')
-                    axs[i, j].set_xlabel(col1)
-                    axs[i, j].set_ylabel("Frequency")
-                else:
-                    # scatter plots
-                    axs[i, j].scatter(trans_df[col2], trans_df[col1], alpha=alpha, marker='o')
-                    axs[i, j].set_xlabel(col2)
-                    axs[i, j].set_ylabel(col1)
-
+        fig.suptitle(f'Pairplots: {pair[0].split("_")[2]}', weight = 'bold', fontsize = 20, y=1.01)
+        plt.subplots_adjust(top=0.9)
         plt.tight_layout()
-        plt.show()
+        plt.savefig(f'../figs/pairplots_{pair[0].split("_")[2]}.png')
+        plt.show();
