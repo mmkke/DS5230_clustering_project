@@ -145,7 +145,7 @@ def generate_column_hist(df: pd.DataFrame, columns: list) -> None:
 
 ####################################################################################################################
 ####################################################################################################################
-def sub_divide_pairplot(trans_df):
+def sub_divide_pairplot(trans_df: pd.DataFrame) -> None:
     '''
         Function: sub_divide_pairplot
         Parameters: 1 pd.DataFrame
@@ -187,3 +187,5 @@ def sub_divide_pairplot(trans_df):
         plt.tight_layout()
         plt.savefig(f'../figs/pairplots_{pair[0].split("_")[2]}.png', bbox_inches = 'tight')
         plt.show();
+
+    return None
