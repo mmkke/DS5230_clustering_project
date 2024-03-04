@@ -185,5 +185,5 @@ def sub_divide_pairplot(trans_df):
         fig.suptitle(f'Pairplots: {pair[0].split("_")[2]}', weight = 'bold', fontsize = 20, y=1.01)
         plt.subplots_adjust(top=0.9)
         plt.tight_layout()
-        plt.savefig(f'../figs/pairplots_{pair[0].split("_")[2]}.png')
+        plt.savefig(f'../figs/pairplots_{pair[0].split("_")[2]}.png', bbox_inches = 'tight')
         plt.show();
