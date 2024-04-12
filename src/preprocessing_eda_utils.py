@@ -154,7 +154,6 @@ def sub_divide_pairplot(trans_df: pd.DataFrame) -> None:
 
         This functions will create 4x4 plt subplots of all pairplots from a attribute matrix with 16 attributes. 
     '''
-
     # plot params
     plt.rcParams['figure.facecolor'] = 'white'
     plt.rcParams['axes.facecolor'] = 'lightblue'
