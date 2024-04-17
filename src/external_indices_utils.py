@@ -18,9 +18,7 @@
         7. convert_string_to_array
         8. get_true_label_purity
 '''
-
 ## Libraries
-
 import time
 import numpy as np
 import pandas as pd
@@ -28,7 +26,8 @@ import itertools
 from scipy.stats import mode
 from sklearn.metrics.cluster import adjusted_rand_score, contingency_matrix
 
-##############################################################################################################
+################################################################################################################
+# 1 #############################################################################################################
 def drop_minus_one_labels(cluster_labels, true_labels):
     '''
     Description: To be applied if clutering produced by dbscan. This function removes the noice (-1) labels 
@@ -52,9 +51,8 @@ def drop_minus_one_labels(cluster_labels, true_labels):
 
     return cluster_labels, true_labels
 
-##############################################################################################################
-##############################################################################################################
-
+###############################################################################################################
+# 2 ############################################################################################################
 def get_modes(n_components, labels_df):
     '''
     Description: The functiont akes in the value of n_components being investigated and the labels_df and 
@@ -96,7 +94,7 @@ def get_modes(n_components, labels_df):
     return results_df.sort_values(['cluster_mode', 'cluster_mode_count'], ascending=False)
 
 ##############################################################################################################
-##############################################################################################################
+# 3 ##########################################################################################################
 
 def get_mapping(n_components, labels_df, modes_df):
     '''
@@ -130,7 +128,7 @@ def get_mapping(n_components, labels_df, modes_df):
 
 
 ##############################################################################################################
-##############################################################################################################
+# 3 ##########################################################################################################
 def get_cont_matrix(true_labels, cluster_labels):
     '''
     Description: Gets the contingency matrix using sklearn object. 
@@ -148,7 +146,7 @@ def get_cont_matrix(true_labels, cluster_labels):
     return cont_matrix
 
 ##############################################################################################################
-##############################################################################################################
+# 4 ##########################################################################################################
 def get_cont_matrices(true_labels, cluster_labels, print_results=False, time_crit=False, duration=300):
     '''
     Description: This function determines the possible adjusted rand score and contingency matrices based on 
@@ -165,8 +163,6 @@ def get_cont_matrices(true_labels, cluster_labels, print_results=False, time_cri
                                                     'contingency_matrix': contingency_matrix,
                                                     'matrix_trace': matrix_trace}
     '''
-
-
     ## permute labels 
     df_row_dict_list = []
     i = 0
@@ -225,7 +221,7 @@ def get_cont_matrices(true_labels, cluster_labels, print_results=False, time_cri
     return external_indicies_df
 
 ##############################################################################################################
-##############################################################################################################
+# 5 ##########################################################################################################
 def find_best_cont_matrix(external_indicies_df):
     '''
     Description: This function finds the best contingency matrix based ont the 
@@ -248,7 +244,7 @@ def find_best_cont_matrix(external_indicies_df):
     return best_indicies
 
 ##############################################################################################################
-##############################################################################################################
+# 6 ##########################################################################################################
 def convert_string_to_array(string: str) -> np.ndarray:
     """
         This function will convert a string to numpy array. When saving a pd.Frame to .csv if one the cells
@@ -261,13 +257,13 @@ def convert_string_to_array(string: str) -> np.ndarray:
         Returns: 
             num_array: (np.ndarray) - the string converted to a numpy array.
     """
-    string = string.strip('[]').replace('\n', '')
+    string = string.strip('[]').replace('\n', '').replace(',', '').replace('[', '').replace(']', '')
     num_list = string.split()
     num_array = np.array([int(num) for num in num_list])
     return num_array
 
 ##############################################################################################################
-##############################################################################################################
+# 7 ##########################################################################################################
 def get_true_label_purity(remapped_cont_matrix: np.ndarray, true_labels: pd.Series) -> tuple[pd.DataFrame, float]:
     """
         This function will compute the true label purity of a clustering results
