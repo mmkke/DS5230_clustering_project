@@ -65,6 +65,7 @@ def clustering(results_dict):
         'trustworthiness' : results_dict['trustworthiness'],
         'eps' : np.nan,
         'dbscan_min_samples' : np.nan,
+        'dbscan_metric': np.nan,
         'validity_index' : np.nan,
         'cluster_labels': cluster_labels
         }
@@ -100,6 +101,7 @@ def clustering(results_dict):
     min_samples = results_df.loc[results_df['validity_index'].idxmax(), 'min_samples']
     n_clusters_found = results_df.loc[results_df['validity_index'].idxmax(), 'n_clusters']
     cluster_label = results_df.loc[results_df['validity_index'].idxmax(), 'cluster_labels']
+    dbscan_metric = results_df.loc[results_df['validity_index'].idxmax(), 'dbscan_metric']
 
     print('DBSCAN')
     print('Number of Clusters: ', n_clusters_found)
@@ -121,6 +123,7 @@ def clustering(results_dict):
             'trustworthiness' : results_dict['trustworthiness'],
             'eps' : eps,
             'dbscan_min_samples' : min_samples,
+            'dbscan_metric': dbscan_metric,
             'validity_index' : validity_index,
             'cluster_labels': cluster_label
             }

@@ -7,6 +7,9 @@ from sklearn.metrics import calinski_harabasz_score, davies_bouldin_score, silho
 from kneed import KneeLocator
 from sklearn.neighbors import KDTree
 
+from sklearn.metrics.pairwise import pairwise_distances
+
+
 import hdbscan.validity as dbcv_hdbscan
 
 ## KMEANS
@@ -296,48 +299,54 @@ def cluster_dbscan(cap_x, f_eps_list, min_samples):
     # init dict list
     df_row_dict_list = []
 
+    metric_list = ['euclidean', 'manhattan', 'chebyshev', 'minkowski', 'cosine', 'correlation']
+
+
     # iterate over eps values
     
     for f_eps in f_eps_list:
+        for metric in metric_list:
+            dist_matrix = pairwise_distances(cap_x, metric=metric)
 
-        dbscan = DBSCAN(
-            eps=f_eps,
-            min_samples=min_samples,
-            metric='euclidean',
-            metric_params=None,
-            algorithm='auto',
-            leaf_size=30,
-            p=None,
-            n_jobs=None
-        )
+            dbscan = DBSCAN(
+                eps=f_eps,
+                min_samples=min_samples,
+                metric='precomputed',
+                metric_params=None,
+                algorithm='auto',
+                leaf_size=30,
+                p=None,
+                n_jobs=None
+            )
 
-        # fit and get clusters
-        dbscan.fit(cap_x)
-        clusters = np.unique(dbscan.labels_)
-        n_clusters = clusters[clusters != -1].shape[0]
+            # fit and get clusters
+            dbscan.fit(dist_matrix)
+            clusters = np.unique(dbscan.labels_)
+            n_clusters = clusters[clusters != -1].shape[0]
 
-        # get labels
-        labels = dbscan.labels_
+            # get labels
+            labels = dbscan.labels_
 
-        # ensure type of embedding values for validity index, must be float64 for some reason
-        cap_x = cap_x.astype(np.float64)
+            # ensure type of embedding values for validity index, must be float64 for some reason
+            dist_matrix = dist_matrix.astype(np.float64)
 
-        # get validity index score
-        try:
-            validity_index = dbcv_hdbscan.validity_index(cap_x, dbscan.labels_)
-        except ValueError as e:
-            print(e)
-            validity_index = np.nan
+            # get validity index score
+            try:
+                validity_index = dbcv_hdbscan.validity_index(X=dist_matrix, d=cap_x.shape[1], labels=dbscan.labels_, metric='precomputed')
+            except ValueError as e:
+                print(e)
+                validity_index = np.nan
 
-        # add results to dict list
-        df_row_dict_list.append({
-            'k_dist_eps': f_eps,
-            'min_samples': min_samples,
-            'n_clusters': n_clusters,
-            'validity_index': validity_index,
-            'fitted_dbscan': dbscan,
-            'cluster_labels': labels
-        })
+            # add results to dict list
+            df_row_dict_list.append({
+                'k_dist_eps': f_eps,
+                'min_samples': min_samples,
+                'n_clusters': n_clusters,
+                'validity_index': validity_index,
+                'fitted_dbscan': dbscan,
+                'dbscan_metric': metric,
+                'cluster_labels': labels
+            })
 
     results_df = pd.DataFrame(df_row_dict_list)
     return results_df
