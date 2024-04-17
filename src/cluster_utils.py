@@ -255,7 +255,7 @@ def find_eps(cap_x, eps_knee_detection_sensitivity=3.0, metric='l2'):
         kdt = KDTree(cap_x, metric=metric)
 
         # try a few values for k, algo was designed using 4
-        k_list = [3, 4, 5, 6]
+        k_list = [3, 4, 5]
 
         # init dicts
         df_row_dict_list = []
@@ -343,7 +343,7 @@ def cluster_dbscan(cap_x, f_eps_list, min_samples):
     # init dict list
     df_row_dict_list = []
 
-    metric_list = ['euclidean', 'manhattan', 'chebyshev', 'cosine', 'correlation']
+    metric_list = ['euclidean', 'chebyshev', 'cosine']
 
 
     # iterate over eps values

@@ -101,7 +101,7 @@ def clustering(results_dict):
     n_clusters_silhouette_score_is_max = results_df.loc[results_df['silhouette_score'].idxmax(), 'n_clusters']
     sil_score = results_df.loc[results_df['silhouette_score'].idxmax(), 'silhouette_score']
     cluster_labels = results_df.loc[results_df['silhouette_score'].idxmax(), 'cluster_labels']
-
+    print('Silhouette Score: ', sil_score)
     # will return valid results in df_row_dict
     df_row_dict = {
         'algo': 'k_means',
@@ -120,6 +120,7 @@ def clustering(results_dict):
         'dbscan_min_samples' : np.nan,
         'dbscan_metric': np.nan,
         'validity_index' : np.nan,
+        'noise_ratio': np.nan,
         'cluster_labels': cluster_labels
         }
     
@@ -142,7 +143,7 @@ def clustering(results_dict):
     eps, min_samples = find_eps(cap_x)
 
     # iterate over a range near eps to find best eps value, determined by valididty score
-    eps_scan_range = [0.8, 1.8, 0.1]
+    eps_scan_range = [1.0, 1.8, 0.2]
     f_eps_list = factor_eps(eps, eps_scan_range)
     
     # iterate dbscan over the eps values in f_eps_list
@@ -155,11 +156,13 @@ def clustering(results_dict):
     n_clusters_found = results_df.loc[results_df['validity_index'].idxmax(), 'n_clusters']
     cluster_label = results_df.loc[results_df['validity_index'].idxmax(), 'cluster_labels']
     dbscan_metric = results_df.loc[results_df['validity_index'].idxmax(), 'dbscan_metric']
-
-
+    noise_ratio = np.sum(cluster_label == -1)/len(cluster_label)
+    
     print('DBSCAN')
     print('Number of Clusters: ', n_clusters_found)
     print('Validity Index: ', validity_index)
+    print(np.unique(cluster_label))
+    print('Noise Ratio: ', noise_ratio)
 
     # return results in df_row_dict
     df_row_dict = {
@@ -179,6 +182,7 @@ def clustering(results_dict):
             'dbscan_min_samples' : min_samples,
             'dbscan_metric': dbscan_metric,
             'validity_index' : validity_index,
+            'noise_ratio': noise_ratio,
             'cluster_labels': cluster_label
             }
 
