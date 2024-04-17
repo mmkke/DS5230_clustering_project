@@ -1,24 +1,51 @@
+# src/cluster_utils.py
+'''
+    Final Project
+    Joseph Nelson Farrell & Michael Missone
+    DS 5230 Unsupervised Machine Learning
+    Northeastern University
+    Steven Morin, PhD
+
+    This file contains a libray of functions used to implement the Kmeans and DBSCAN clustering algorithms.
+    
+
+    Functions: (in order)
+        KMEANS
+            1. kmeans_indicies
+            2. clustering_kmeans
+            3. find_elbow
+            4. get_NN
+            5. get_hopkins
+        DBSCAN
+            6. find_eps
+            7. factor_eps
+            8. cluster_dbscan
+
+'''
+
+## Libraries
 import numpy as np
 import pandas as pd
 
-from sklearn.cluster import DBSCAN, KMeans
+# KMEANS
 from sklearn.metrics import calinski_harabasz_score, davies_bouldin_score, silhouette_score
-
 from kneed import KneeLocator
 from sklearn.neighbors import KDTree
+from sklearn.cluster import KMeans
 
+# DBSCAN
 from sklearn.metrics.pairwise import pairwise_distances
-
-
+from sklearn.cluster import DBSCAN
 import hdbscan.validity as dbcv_hdbscan
 
 ## KMEANS
 #########################################################################################################
-#########################################################################################################
+# 1 #######################################################################################################
 
 def kmeans_indices(cap_x, labels):
     '''
-    Description: Returns a dict with the internal indices for the kmeans clustering.
+    Description: 
+            Returns a dict with the internal indices for the kmeans clustering.
     Input:
             cap_x: embedding (ndarray)
             labels: kmeans labels (ndarray)
@@ -28,6 +55,11 @@ def kmeans_indices(cap_x, labels):
                             'calinski_harabasz_score': calinski_harabasz_score,
                             'silhouette_score': silhouette_score
                             }
+    Documentation:
+        https://scikit-learn.org/stable/modules/generated/sklearn.metrics.davies_bouldin_score.html
+        https://scikit-learn.org/stable/modules/generated/sklearn.metrics.calinski_harabasz_score.html
+        https://scikit-learn.org/stable/modules/generated/sklearn.metrics.silhouette_score.html
+
     '''
 
     indices_dict = {}
@@ -45,13 +77,11 @@ def kmeans_indices(cap_x, labels):
     indices_dict["silhouette_score"] = sil_score
 
     return indices_dict
-#########################################################################################################
+# 2 #######################################################################################################
 
 def clustering_kmeans(cap_x, n_clusters, df_row_dict_list):
     '''
     Description: Performs k-means clustering.
-
-        https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
 
     Input:
             cap_x: embedding (ndarray)
@@ -65,6 +95,8 @@ def clustering_kmeans(cap_x, n_clusters, df_row_dict_list):
                                     'davies_bouldin_score': indices_dict['davies_bouldin_score'],
                                     'silhouette_score': indices_dict['silhouette_score']
                                 }
+    Documentation:
+        https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html 
     '''
     # define kmeans object and set params
     kmeans = KMeans(
@@ -86,7 +118,7 @@ def clustering_kmeans(cap_x, n_clusters, df_row_dict_list):
     # get lables and inertia
     labels = kmeans.labels_
     inertia = kmeans.inertia_
-
+ 
     # internal indices
     indices_dict = kmeans_indices(cap_x, labels)
 
@@ -102,19 +134,21 @@ def clustering_kmeans(cap_x, n_clusters, df_row_dict_list):
         }
     )
     return df_row_dict_list
-#########################################################################################################
+# 3 #######################################################################################################
 
 def find_elbow(results_df, sensitivity=1.0):
     '''
-    Description: Finds the best value of n_clusters using knee plot of inerita vs n_clusters
-
-        https://kneed.readthedocs.io/en/stable/api.html#kneelocator
+    Description: Finds the best value of n_clusters using knee plot of inerita vs n_cluster
 
     Input:
             results_df
             sensitivity: default=1.0
     Returns:
             n_clusters
+
+    Documentation:
+            https://kneed.readthedocs.io/en/stable/api.html#kneelocator
+
     '''
         
     # set kneed locator params
@@ -135,18 +169,22 @@ def find_elbow(results_df, sensitivity=1.0):
         n_clusters = None
 
     return n_clusters
-#########################################################################################################
+
+# 4 #######################################################################################################
 
 def get_NN(cap_x):
     '''
     Description: Returns nearest neighbors distances list.
 
-        https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KDTree.html
-
     Parameters:
             cap_x (np.ndarray): design matrix
     Returns:
-            nn_dist_list (list): list of nearest neighbors'''
+            nn_dist_list (list): list of nearest neighbors
+            
+    Documentation:
+        https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KDTree.html
+
+    '''
         
     # build the kdtree
     kdt = KDTree(cap_x)
@@ -157,7 +195,7 @@ def get_NN(cap_x):
         nn_dist_list.append(dist[0, -1])
 
     return nn_dist_list
-#########################################################################################################
+# 5 #######################################################################################################
 
 def get_hopkins(cap_x):
     '''
@@ -194,13 +232,12 @@ def get_hopkins(cap_x):
 
 ## DBSCAN
 #########################################################################################################
-#########################################################################################################
+# 6 #######################################################################################################
 
 def find_eps(cap_x, eps_knee_detection_sensitivity=3.0, metric='l2'):
         ''' 
         Description: Finds the eps and min_sample value using KneeLocator
 
-            https://kneed.readthedocs.io/en/stable/api.html#kneelocator
 
         Parameters:
                 cap_x (np.ndarray): design matrix
@@ -208,6 +245,10 @@ def find_eps(cap_x, eps_knee_detection_sensitivity=3.0, metric='l2'):
                 metric='l2'(default)
         Returns:
                 eps, min_samples
+
+        Documentation:
+            https://kneed.readthedocs.io/en/stable/api.html#kneelocator
+
         '''
 
         # build the kdtree - KDTree for fast generalized N-point problems
@@ -261,7 +302,8 @@ def find_eps(cap_x, eps_knee_detection_sensitivity=3.0, metric='l2'):
         min_samples = eps_k_df.loc[eps_k_df.eps == eps, 'k'].values[0]
 
         return eps, min_samples
-#########################################################################################################
+
+# 7 #######################################################################################################
 
 def factor_eps(eps, eps_scan_range):
     '''
@@ -277,7 +319,7 @@ def factor_eps(eps, eps_scan_range):
     for factor in np.arange(eps_scan_range[0], eps_scan_range[1], eps_scan_range[2]):
           f_eps_list.append(factor*eps)
     return f_eps_list
-#########################################################################################################
+# 8 #######################################################################################################
 
 def cluster_dbscan(cap_x, f_eps_list, min_samples):
     '''
@@ -294,12 +336,14 @@ def cluster_dbscan(cap_x, f_eps_list, min_samples):
                                 'validity_index': validity_index,
                                 'fitted_dbscan': dbscan
                                 })
+    Documentation:
+        https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html
     '''
 
     # init dict list
     df_row_dict_list = []
 
-    metric_list = ['euclidean', 'manhattan', 'chebyshev', 'minkowski', 'cosine', 'correlation']
+    metric_list = ['euclidean', 'manhattan', 'chebyshev', 'cosine', 'correlation']
 
 
     # iterate over eps values

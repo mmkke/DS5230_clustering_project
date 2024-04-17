@@ -1,9 +1,62 @@
+# src/clustering.py 
+'''
+    Final Project
+    Joseph Nelson Farrell & Michael Missone
+    DS 5230 Unsupervised Machine Learning
+    Northeastern University
+    Steven Morin, PhD
+
+    This file contains a Kmeans and DBSCAN clustering algorithm with internal indices. 
+
+    Functions: (in order)
+        1. clustering
+
+'''
+## Libraries
 import numpy as np
+
+## Modules
 from cluster_utils import *
 
 
+################################################################################################################
+# 1 #############################################################################################################
 
 def clustering(results_dict):
+    '''
+    Description: This module first attempt to find a KMEANS clustering solution. If KMEANS fails
+    it will then peform dbscan clustering.
+
+    Parameters:
+                results_dict (dict) = {
+                                    'embedding' : embedding,
+                                    'n_neighbors' : n_neighbors,
+                                    'min_dist' : min_dist,
+                                    'metric' : metric,
+                                    'n_components': n_components,
+                                    'trustworthiness' : trust
+                                    }
+    Returns:
+                df_row_dict (dict) = {
+                                'algo': algo,
+                                'n_clusters_found' : n_clusters_found,
+                                'n_clusters_db_score_is_min' : n_clusters_db_score_is_min,
+                                'n_clusters_ch_score_is_max' : n_clusters_ch_score_is_max,
+                                'n_clusters_silhouette_score_is_max' : n_clusters_silhouette_score_is_max,
+                                'silhouette_score' : sil_score,
+                                'hopkins_statistic' : cap_h,
+                                'umap_n_neighbors' : results_dict['n_neighbors'],
+                                'umap_min_dist' : results_dict['min_dist'],
+                                'umap_metric' : results_dict['metric'],
+                                'umap_n_components' : results_dict['n_components'],
+                                'trustworthiness' : results_dict['trustworthiness'],
+                                'eps' : eps,
+                                'dbscan_min_samples' : min_samples,
+                                'dbscan_metric': dbscan_metric,
+                                'validity_index' : validity_index,
+                                'cluster_labels': cluster_label
+                                }
+    '''
     print('*'*100)
     print('*'*100)
     print('Hyperparameters:')
@@ -47,7 +100,7 @@ def clustering(results_dict):
     n_clusters_ch_score_is_max = results_df.loc[results_df['calinski_harabasz_score'].idxmax(), 'n_clusters']
     n_clusters_silhouette_score_is_max = results_df.loc[results_df['silhouette_score'].idxmax(), 'n_clusters']
     sil_score = results_df.loc[results_df['silhouette_score'].idxmax(), 'silhouette_score']
-    cluster_labels = results_df.loc[results_df['n_clusters'] == n_clusters_found, 'cluster_labels']
+    cluster_labels = results_df.loc[results_df['silhouette_score'].idxmax(), 'cluster_labels']
 
     # will return valid results in df_row_dict
     df_row_dict = {
@@ -102,6 +155,7 @@ def clustering(results_dict):
     n_clusters_found = results_df.loc[results_df['validity_index'].idxmax(), 'n_clusters']
     cluster_label = results_df.loc[results_df['validity_index'].idxmax(), 'cluster_labels']
     dbscan_metric = results_df.loc[results_df['validity_index'].idxmax(), 'dbscan_metric']
+
 
     print('DBSCAN')
     print('Number of Clusters: ', n_clusters_found)
