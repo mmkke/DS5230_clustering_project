@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 import itertools
 from scipy.stats import mode
-from sklearn.metrics.cluster import adjusted_rand_score, contingency_matrix
+from sklearn.metrics.cluster import contingency_matrix
 
 ################################################################################################################
 # 1 #############################################################################################################

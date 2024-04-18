@@ -55,17 +55,9 @@ def cluster_kmeans(cap_x):
         https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
 
     Input:
-            cap_x: embedding (ndarray)
-            n_cclusters: value for n_clusters (int)
-            df_row_dict_list = list for dicts of kmeans results    
+            cap_x: embedding (ndarray)   
     Returns:
-            df_row_dict_list.append({
-                                    'n_clusters': n_clusters,
-                                    'inertia': inertia,
-                                    'calinski_harabasz_score': indices_dict['calinski_harabasz_score'],
-                                    'davies_bouldin_score': indices_dict['davies_bouldin_score'],
-                                    'silhouette_score': indices_dict['silhouette_score']
-                                }
+            sil_score: (float) - the silhouette score of the cluster output.
     '''
     # define kmeans object and set params
     kmeans = KMeans()
