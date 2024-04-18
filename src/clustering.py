@@ -101,11 +101,12 @@ def clustering(results_dict):
     n_clusters_silhouette_score_is_max = results_df.loc[results_df['silhouette_score'].idxmax(), 'n_clusters']
     sil_score = results_df.loc[results_df['silhouette_score'].idxmax(), 'silhouette_score']
     cluster_labels = results_df.loc[results_df['silhouette_score'].idxmax(), 'cluster_labels']
-    print('Silhouette Score: ', sil_score)
+    n_clusters = results_df.loc[results_df['silhouette_score'].idxmax(), 'n_clusters']
+
     # will return valid results in df_row_dict
     df_row_dict = {
         'algo': 'k_means',
-        'n_clusters_found' : n_clusters_found,
+        'n_clusters_found' : n_clusters,
         'n_clusters_db_score_is_min' : n_clusters_db_score_is_min,
         'n_clusters_ch_score_is_max' : n_clusters_ch_score_is_max,
         'n_clusters_silhouette_score_is_max' : n_clusters_silhouette_score_is_max,
@@ -127,12 +128,14 @@ def clustering(results_dict):
     # test1
     if n_clusters_found == n_clusters_db_score_is_min == n_clusters_ch_score_is_max == n_clusters_silhouette_score_is_max:
         print("Test1 Pass: Kmeans successfully clustered.")
-        print('Number of Clusters: ', n_clusters_found)
+        print('Number of Clusters: ', n_clusters)
+        print('Silhouette Score: ', sil_score)
         return df_row_dict
     # test2
     if  n_clusters_db_score_is_min == n_clusters_ch_score_is_max == n_clusters_silhouette_score_is_max:
         print("Test2 Pass: Kmeans successfully clustered.")
-        print('Number of Clusters: ', n_clusters_found)
+        print('Number of Clusters: ', n_clusters)
+        print('Silhouette Score: ', sil_score)
         return df_row_dict
     print("Fail: Kmeans did not successfully cluster.")
 
