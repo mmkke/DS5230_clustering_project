@@ -258,8 +258,7 @@ def convert_string_to_array(string: str) -> np.ndarray:
         Returns: 
             num_array: (np.ndarray) - the string converted to a numpy array.
     """
-    string = string.strip('[]').replace('\n', '').replace(',', '').replace('[', '').replace(']', '')
-    num_list = string.split()
+    num_list = string.split(',')
     num_array = np.array([int(num) for num in num_list])
     return num_array
 
