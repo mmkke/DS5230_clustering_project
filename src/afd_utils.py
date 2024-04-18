@@ -43,12 +43,12 @@ def get_randomly_distributed_data(cap_x, seed = 42, plots = False):
         plt.show()
     else:
         if plots:
-            print(f'\nrandomly_distributed_data.shape[1] = {randomly_distributed_data.shape[1]} > 2 - '
+            print(f'\nrandomly_distributed_data.shape[1] = {randomly_distributed_data.shape[1]} > 2 - 1'
                   f'no plot generated\n')
 
     return randomly_distributed_data
 
-def cluster_kmeans(cap_x):
+def cluster_kmeans(cap_x, k):
     '''
     Description: Performs k-means clustering.
 
@@ -60,7 +60,7 @@ def cluster_kmeans(cap_x):
             sil_score: (float) - the silhouette score of the cluster output.
     '''
     # define kmeans object and set params
-    kmeans = KMeans()
+    kmeans = KMeans(n_clusters = k)
 
     # fit k means
     kmeans.fit_predict(cap_x)
