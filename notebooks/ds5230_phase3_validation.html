@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>ds5230_phase3_clustering_optimization</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>ds5230_phase3_validation</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7482,7 +7482,7 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Final-Project:-Phase-3---Clustering-Pipeline-Optimization">Final Project: Phase 3 - Clustering Pipeline Optimization<a class="anchor-link" href="#Final-Project:-Phase-3---Clustering-Pipeline-Optimization">¶</a></h2><p>Spring 2024<br/>
+<h2 id="Final-Project:-Phase-3---Validation-with-External-Indices">Final Project: Phase 3 - Validation with External Indices<a class="anchor-link" href="#Final-Project:-Phase-3---Validation-with-External-Indices">¶</a></h2><p>Spring 2024<br/>
 Group: Michael Massone and Joseph Nelson Farrell<br/>
 DS 5230 Unsupervised Machine Learning<br/>
 Professor Steven Morin, PhD<br/>
@@ -7496,45 +7496,23 @@ Due: 04/21/2024</p>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1">## Libraries</span>
-
-<span class="c1"># base</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># base</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">import</span> <span class="nn">random</span>
-
-
-<span class="c1"># preprocessing</span>
-<span class="kn">from</span> <span class="nn">sklearn.utils</span> <span class="kn">import</span> <span class="n">shuffle</span>
-<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
-
-<span class="c1"># data</span>
-<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_digits</span>
-
-<span class="c1"># clustering</span>
-<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">DBSCAN</span><span class="p">,</span> <span class="n">KMeans</span>
-
-<span class="c1">#external indices</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics.cluster</span> <span class="kn">import</span> <span class="n">adjusted_rand_score</span><span class="p">,</span> <span class="n">contingency_matrix</span>
-
-<span class="c1"># runtime and run tracking</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics.cluster</span> <span class="kn">import</span> <span class="p">(</span><span class="n">adjusted_rand_score</span><span class="p">,</span> <span class="n">contingency_matrix</span><span class="p">,</span> 
+                                     <span class="n">fowlkes_mallows_score</span><span class="p">,</span> <span class="n">normalized_mutual_info_score</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="p">(</span><span class="n">jaccard_score</span><span class="p">,</span> <span class="n">f1_score</span><span class="p">,</span> <span class="n">homogeneity_score</span><span class="p">)</span>
 
 <span class="c1"># pathing</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-
-<span class="kn">import</span> <span class="nn">warnings</span>
-
-<span class="c1"># Disable runtime warnings</span>
-<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">"ignore"</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">RuntimeWarning</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7547,35 +7525,7 @@ Due: 04/21/2024</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Start-Timer">Start Timer<a class="anchor-link" href="#Start-Timer">¶</a></h3>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># track runtime</span>
-<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Define-File-Paths">Define File Paths<a class="anchor-link" href="#Define-File-Paths">¶</a></h3>
+<h3 id="Set-Paths">Set Paths<a class="anchor-link" href="#Set-Paths">¶</a></h3>
 </div>
 </div>
 </div>
@@ -7584,27 +7534,28 @@ Due: 04/21/2024</p>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># define path</span>
-<span class="n">NB_PATH</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">NB_PATH</span><span class="p">)</span>
-<span class="n">PATH</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">NB_PATH</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">PATH</span><span class="p">)</span>
+<span class="n">HOME</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">HOME</span><span class="p">)</span>
+
+<span class="n">HOME_PARENT_STR</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">HOME</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">HOME_PARENT_STR</span><span class="p">)</span>
 
 <span class="c1"># path to figs folder</span>
-<span class="n">FIGS_PATH</span> <span class="o">=</span> <span class="n">PATH</span> <span class="o">+</span> <span class="s1">'/figs'</span>
+<span class="n">PATH_TO_FIGS_FOLDER</span> <span class="o">=</span> <span class="n">HOME_PARENT_STR</span> <span class="o">+</span> <span class="s1">'/figs'</span>
 
 <span class="c1"># path to data</span>
-<span class="n">DATA_PATH</span><span class="o">=</span> <span class="n">PATH</span> <span class="o">+</span> <span class="s1">'/data'</span>
+<span class="n">PATH_TO_DATA_FOLDER</span> <span class="o">=</span> <span class="n">HOME_PARENT_STR</span> <span class="o">+</span> <span class="s1">'/data'</span>
 
 <span class="c1"># path to src folder</span>
-<span class="n">SRC_PATH</span> <span class="o">=</span> <span class="n">PATH</span> <span class="o">+</span> <span class="s1">'/src'</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">SRC_PATH</span><span class="p">)</span>
+<span class="n">PATH_TO_SRC</span> <span class="o">=</span> <span class="n">HOME_PARENT_STR</span> <span class="o">+</span> <span class="s1">'/src'</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">PATH_TO_SRC</span><span class="p">)</span>
 
 <span class="c1"># sys path</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SRC_PATH</span><span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">PATH_TO_SRC</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7632,568 +7583,7 @@ Due: 04/21/2024</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Import-Modules">Import Modules<a class="anchor-link" href="#Import-Modules">¶</a></h3>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># modules and util</span>
-<span class="kn">import</span> <span class="nn">dimensionality_reduction</span> <span class="k">as</span> <span class="nn">dr</span>
-<span class="kn">import</span> <span class="nn">clustering</span> <span class="k">as</span> <span class="nn">cl</span>
-<span class="kn">from</span> <span class="nn">cluster_utils</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">external_indices_utils</span> <span class="kn">import</span> <span class="o">*</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Parameters">Parameters<a class="anchor-link" href="#Parameters">¶</a></h3>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># transformed data csv file name</span>
-<span class="n">DESIGN_FILE</span> <span class="o">=</span> <span class="s1">'/curated/shuffled_design.csv'</span>
-
-<span class="c1"># target vector csv file name</span>
-<span class="n">TARGET_FILE</span> <span class="o">=</span> <span class="s2">"/curated/shuffled_target.csv"</span>
-
-<span class="c1"># sampled target dataframe csv loc</span>
-<span class="n">TARGET_VECTOR_SHUFFLED_FILENAME</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'/sampled/sampled_target</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span><span class="w"> </span><span class="s2">""</span><span class="p">)</span><span class="si">}</span><span class="s1">.csv'</span>
-
-<span class="c1"># sampled design dataframe csv loc</span>
-<span class="n">DESIGN_MATRIX_SHUFFLED_FILENAME</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'/sampled/sampled_design</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span><span class="w"> </span><span class="s2">""</span><span class="p">)</span><span class="si">}</span><span class="s1">.csv'</span>
-
-<span class="c1"># all results dataframe csv loc</span>
-<span class="n">ALL_RESULTS_FILENAME</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'/results/all_results_</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span><span class="w"> </span><span class="s2">""</span><span class="p">)</span><span class="si">}</span><span class="s1">.csv'</span>
-
-<span class="c1"># filtered results dataframe csv loc</span>
-<span class="n">FILTERED_RESULTS_FILENAME</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'/results/filtered_results_</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span><span class="w"> </span><span class="s2">""</span><span class="p">)</span><span class="si">}</span><span class="s1">.csv'</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Load-Data">Load Data<a class="anchor-link" href="#Load-Data">¶</a></h3>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">target_vector_shuffled</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">TARGET_FILE</span><span class="p">)</span>
-
-<span class="n">design_matrix_shuffled</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">DESIGN_FILE</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#design_matrix_shuffled = design_matrix_shuffled.loc[:, :'numerical__ShapeFactor1']</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Sample-Data">Sample Data<a class="anchor-link" href="#Sample-Data">¶</a></h3>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">sample</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="k">if</span> <span class="n">sample</span><span class="p">:</span>
-    <span class="c1"># num samples</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="mi">1000</span>
-
-    <span class="c1"># random seed</span>
-    <span class="n">rand_seed</span> <span class="o">=</span> <span class="mi">42</span>
-
-    <span class="c1"># sample target and save copy to csv</span>
-    <span class="n">target_vector_shuffled</span> <span class="o">=</span> <span class="n">target_vector_shuffled</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">rand_seed</span><span class="p">)</span>
-    <span class="n">target_vector_shuffled</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">TARGET_VECTOR_SHUFFLED_FILENAME</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Sampled target dataframe saved at:"</span><span class="p">,</span> <span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">TARGET_VECTOR_SHUFFLED_FILENAME</span><span class="p">)</span>
-
-
-     <span class="c1"># sample target and save copy to csv</span>
-    <span class="n">design_matrix_shuffled</span> <span class="o">=</span> <span class="n">design_matrix_shuffled</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">rand_seed</span><span class="p">)</span>
-    <span class="n">design_matrix_shuffled</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">DESIGN_MATRIX_SHUFFLED_FILENAME</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Sampled design dataframe saved at:"</span><span class="p">,</span> <span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">DESIGN_MATRIX_SHUFFLED_FILENAME</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Create-capX">Create capX<a class="anchor-link" href="#Create-capX">¶</a></h3>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># drop ID col</span>
-<span class="n">design_matrix_shuffled_noID</span> <span class="o">=</span> <span class="n">design_matrix_shuffled</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">'ID'</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-<span class="c1"># convert to ndarray</span>
-<span class="n">cap_x</span> <span class="o">=</span> <span class="n">design_matrix_shuffled_noID</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-<span class="n">cap_x</span> <span class="o">=</span> <span class="n">design_matrix_shuffled</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'cap_x shape: </span><span class="si">{</span><span class="n">cap_x</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-<span class="n">cap_x</span><span class="o">.</span><span class="n">shape</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>cap_x shape: (13611, 17)
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[9]:</div>
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
-<pre>(13611, 17)</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Select-Hyperparameters-for-Gridsearch">Select Hyperparameters for Gridsearch<a class="anchor-link" href="#Select-Hyperparameters-for-Gridsearch">¶</a></h3>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># select hyperparams</span>
-<span class="n">params1</span><span class="o">=</span><span class="kc">False</span>
-<span class="n">params2</span><span class="o">=</span><span class="kc">False</span>
-<span class="n">params3</span><span class="o">=</span><span class="kc">False</span>
-<span class="n">params4</span><span class="o">=</span><span class="kc">False</span>
-<span class="n">params5</span><span class="o">=</span><span class="kc">True</span>
-
-<span class="k">if</span> <span class="n">params1</span><span class="p">:</span>
-
-    <span class="n">min_dist_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
-    <span class="n">n_neighbors_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">]</span>
-    <span class="n">metric_list</span> <span class="o">=</span><span class="p">[</span><span class="s1">'euclidean'</span><span class="p">,</span> <span class="s1">'canberra'</span><span class="p">,</span> <span class="s1">'mahalanobis'</span><span class="p">,</span> <span class="s1">'correlation'</span><span class="p">]</span>
-    <span class="n">n_components_list</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-
-
-<span class="k">if</span> <span class="n">params2</span><span class="p">:</span>
-
-    <span class="n">min_dist_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]</span>
-    <span class="n">n_neighbors_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">750</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span>
-    <span class="n">metric_list</span> <span class="o">=</span><span class="p">[</span><span class="s1">'cosine'</span><span class="p">,</span> <span class="s1">'euclidean'</span><span class="p">]</span>
-    <span class="n">n_components_list</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
-
-
-<span class="k">if</span> <span class="n">params3</span><span class="p">:</span>
-
-    <span class="n">min_dist_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]</span>
-    <span class="n">n_neighbors_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1500</span><span class="p">]</span>
-    <span class="n">metric_list</span> <span class="o">=</span><span class="p">[</span><span class="s1">'euclidean'</span><span class="p">,</span> <span class="s1">'cosine'</span><span class="p">]</span>
-    <span class="n">n_components_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">]</span>
-
-
-<span class="k">if</span> <span class="n">params4</span><span class="p">:</span>
-
-    <span class="n">min_dist_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span>
-    <span class="n">n_neighbors_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">750</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span>
-    <span class="n">metric_list</span> <span class="o">=</span><span class="p">[</span><span class="s1">'cosine'</span><span class="p">,</span> <span class="s1">'euclidean'</span><span class="p">]</span>
-    <span class="n">n_components_list</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
-
-<span class="k">if</span> <span class="n">params5</span><span class="p">:</span>
-
-    <span class="n">min_dist_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
-    <span class="n">n_neighbors_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1000</span><span class="p">]</span>
-    <span class="n">metric_list</span> <span class="o">=</span><span class="p">[</span><span class="s1">'euclidean'</span><span class="p">]</span>
-    <span class="n">n_components_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">]</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Gridsearch-Algorithm">Gridsearch Algorithm<a class="anchor-link" href="#Gridsearch-Algorithm">¶</a></h3>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">runs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">n_components_list</span><span class="p">)</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">min_dist_list</span><span class="p">)</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">n_neighbors_list</span><span class="p">)</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">metric_list</span><span class="p">)</span>
-<span class="n">run</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">df_row_dict_list</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">n_components</span> <span class="ow">in</span> <span class="n">n_components_list</span><span class="p">:</span>
-  <span class="k">for</span> <span class="n">min_dist</span> <span class="ow">in</span> <span class="n">min_dist_list</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">n_neighbors</span> <span class="ow">in</span> <span class="n">n_neighbors_list</span><span class="p">:</span> 
-      <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metric_list</span><span class="p">:</span>
-        <span class="n">run</span> <span class="o">+=</span><span class="mi">1</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">'*'</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Run </span><span class="si">{</span><span class="n">run</span><span class="si">}</span><span class="s1"> of </span><span class="si">{</span><span class="n">runs</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="n">results_dict</span> <span class="o">=</span> <span class="n">dr</span><span class="o">.</span><span class="n">umap_dim_red</span><span class="p">(</span><span class="n">cap_x</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">min_dist</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">n_components</span><span class="p">)</span> 
-        <span class="n">df_row_dict</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">clustering</span><span class="p">(</span><span class="n">results_dict</span><span class="p">)</span>
-        <span class="n">df_row_dict_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_row_dict</span><span class="p">)</span>
-<span class="n">results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">df_row_dict_list</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>****************************************************************************************************
-Run 1 of 3
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/umap/umap_.py:1943: UserWarning: n_jobs value -1 overridden to 1 by setting random_state. Use no seed for parallelism.
-  warn(f"n_jobs value {self.n_jobs} overridden to 1 by setting random_state. Use no seed for parallelism.")
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>****************************************************************************************************
-****************************************************************************************************
-Hyperparameters:
-n_neighbors:  1000
-min_dist:  0
-metric:  euclidean
-n_components:  7
-Hopkin's Statistic = 0.002807245746021458
-Test2 Pass: Kmeans successfully clustered.
-Number of Clusters:  15
-Silhouette Score:  0.5167888
-****************************************************************************************************
-Run 2 of 3
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/umap/umap_.py:1943: UserWarning: n_jobs value -1 overridden to 1 by setting random_state. Use no seed for parallelism.
-  warn(f"n_jobs value {self.n_jobs} overridden to 1 by setting random_state. Use no seed for parallelism.")
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>****************************************************************************************************
-****************************************************************************************************
-Hyperparameters:
-n_neighbors:  1000
-min_dist:  0.1
-metric:  euclidean
-n_components:  7
-Hopkin's Statistic = 0.003564701996774471
-Fail: Kmeans did not successfully cluster.
-DBSCAN
-Number of Clusters:  2
-Validity Index:  0.6410520870508877
-[0 1]
-Noise Ratio:  0.0
-****************************************************************************************************
-Run 3 of 3
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/umap/umap_.py:1943: UserWarning: n_jobs value -1 overridden to 1 by setting random_state. Use no seed for parallelism.
-  warn(f"n_jobs value {self.n_jobs} overridden to 1 by setting random_state. Use no seed for parallelism.")
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>****************************************************************************************************
-****************************************************************************************************
-Hyperparameters:
-n_neighbors:  1000
-min_dist:  0.5
-metric:  euclidean
-n_components:  7
-Hopkin's Statistic = 0.012625946062742487
-Fail: Kmeans did not successfully cluster.
-DBSCAN
-Number of Clusters:  44
-Validity Index:  0.006159406417206135
-[-1  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22
- 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43]
-Noise Ratio:  0.009624568363823378
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h2 id="All-Results">All Results<a class="anchor-link" href="#All-Results">¶</a></h2>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">results_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">ALL_RESULTS_FILENAME</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Filtered results dataframe saved at:"</span><span class="p">,</span> <span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">ALL_RESULTS_FILENAME</span><span class="p">)</span>
-
-<span class="c1"># display max rows</span>
-<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">'display.max_rows'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">'display.max_columns'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-<span class="n">results_df</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Filtered results dataframe saved at: /Users/mikey/LocalFiles/DS5230/final_project/DS5230-final/data/results/all_results_2024-04-1812:46:17.162801.csv
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[12]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>algo</th>
-<th>n_clusters_found</th>
-<th>n_clusters_db_score_is_min</th>
-<th>n_clusters_ch_score_is_max</th>
-<th>n_clusters_silhouette_score_is_max</th>
-<th>silhouette_score</th>
-<th>hopkins_statistic</th>
-<th>umap_n_neighbors</th>
-<th>umap_min_dist</th>
-<th>umap_metric</th>
-<th>umap_n_components</th>
-<th>trustworthiness</th>
-<th>eps</th>
-<th>dbscan_min_samples</th>
-<th>dbscan_metric</th>
-<th>validity_index</th>
-<th>noise_ratio</th>
-<th>cluster_labels</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>0</th>
-<td>k_means</td>
-<td>15</td>
-<td>15.0</td>
-<td>15.0</td>
-<td>15.0</td>
-<td>0.516789</td>
-<td>0.002807</td>
-<td>1000</td>
-<td>0.0</td>
-<td>euclidean</td>
-<td>7</td>
-<td>0.999931</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>[12, 7, 5, 5, 1, 5, 10, 12, 4, 8, 14, 11, 6, 0...</td>
-</tr>
-<tr>
-<th>1</th>
-<td>dbscan</td>
-<td>2</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>0.003565</td>
-<td>1000</td>
-<td>0.1</td>
-<td>euclidean</td>
-<td>7</td>
-<td>0.999926</td>
-<td>0.088648</td>
-<td>5.0</td>
-<td>chebyshev</td>
-<td>0.641052</td>
-<td>0.000000</td>
-<td>[0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, ...</td>
-</tr>
-<tr>
-<th>2</th>
-<td>dbscan</td>
-<td>44</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>0.012626</td>
-<td>1000</td>
-<td>0.5</td>
-<td>euclidean</td>
-<td>7</td>
-<td>0.998763</td>
-<td>0.147875</td>
-<td>5.0</td>
-<td>euclidean</td>
-<td>0.006159</td>
-<td>0.009625</td>
-<td>[0, 1, 0, 2, 3, 0, 4, 0, 5, 6, 7, 8, 9, 10, 11...</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<h3 id="Import-Functions">Import Functions<a class="anchor-link" href="#Import-Functions">¶</a></h3>
 </div>
 </div>
 </div>
@@ -8205,9 +7595,8 @@ Noise Ratio:  0.009624568363823378
 <div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># set max rows back to default</span>
-<span class="n">pd</span><span class="o">.</span><span class="n">reset_option</span><span class="p">(</span><span class="s1">'display.max_rows'</span><span class="p">)</span>
-<span class="n">pd</span><span class="o">.</span><span class="n">reset_option</span><span class="p">(</span><span class="s1">'display.max_columns'</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">cluster_utils</span> <span class="k">as</span> <span class="nn">cu</span>
+<span class="kn">import</span> <span class="nn">external_indices_utils</span> <span class="k">as</span> <span class="nn">exi</span>
 </pre></div>
 </div>
 </div>
@@ -8220,23 +7609,11 @@ Noise Ratio:  0.009624568363823378
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Get-n-Best-Results-(kmeans-and-DBSCAN)">Get n Best Results (kmeans and DBSCAN)<a class="anchor-link" href="#Get-n-Best-Results-(kmeans-and-DBSCAN)">¶</a></h3>
+<h3 id="Import-Results-DF-&amp;-Target-DF">Import Results DF &amp; Target DF<a class="anchor-link" href="#Import-Results-DF-&amp;-Target-DF">¶</a></h3>
 </div>
 </div>
 </div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h4 id="Kmeans-Results">Kmeans Results<a class="anchor-link" href="#Kmeans-Results">¶</a></h4>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8244,103 +7621,18 @@ Noise Ratio:  0.009624568363823378
 <div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">n</span><span class="o">=</span><span class="mi">1</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># transformed data csv file name</span>
+<span class="n">results_file</span> <span class="o">=</span> <span class="s2">"/results/filtered_results_2024-04-1811:12:48.064452.csv"</span>
+<span class="n">results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">PATH_TO_DATA_FOLDER</span> <span class="o">+</span> <span class="n">results_file</span><span class="p">)</span>
 
-<span class="n">kmeans_results_df</span> <span class="o">=</span> <span class="n">results_df</span><span class="p">[</span><span class="n">results_df</span><span class="p">[</span><span class="s1">'algo'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'k_means'</span><span class="p">]</span>
-<span class="n">kmeans_results_df</span> <span class="o">=</span> <span class="n">kmeans_results_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">'silhouette_score'</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">best_kmeans_results_df</span> <span class="o">=</span> <span class="n">kmeans_results_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<span class="n">best_kmeans_results_df</span>
+<span class="n">target_sample</span> <span class="o">=</span> <span class="s2">"/curated/shuffled_target.csv"</span>
+<span class="n">target_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">PATH_TO_DATA_FOLDER</span> <span class="o">+</span> <span class="n">target_sample</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[14]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>algo</th>
-<th>n_clusters_found</th>
-<th>n_clusters_db_score_is_min</th>
-<th>n_clusters_ch_score_is_max</th>
-<th>n_clusters_silhouette_score_is_max</th>
-<th>silhouette_score</th>
-<th>hopkins_statistic</th>
-<th>umap_n_neighbors</th>
-<th>umap_min_dist</th>
-<th>umap_metric</th>
-<th>umap_n_components</th>
-<th>trustworthiness</th>
-<th>eps</th>
-<th>dbscan_min_samples</th>
-<th>dbscan_metric</th>
-<th>validity_index</th>
-<th>noise_ratio</th>
-<th>cluster_labels</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>0</th>
-<td>k_means</td>
-<td>15</td>
-<td>15.0</td>
-<td>15.0</td>
-<td>15.0</td>
-<td>0.516789</td>
-<td>0.002807</td>
-<td>1000</td>
-<td>0.0</td>
-<td>euclidean</td>
-<td>7</td>
-<td>0.999931</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>[12, 7, 5, 5, 1, 5, 10, 12, 4, 8, 14, 11, 6, 0...</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h4 id="DBSCAN-Results">DBSCAN Results<a class="anchor-link" href="#DBSCAN-Results">¶</a></h4>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8348,85 +7640,9 @@ Noise Ratio:  0.009624568363823378
 <div class="jp-InputPrompt jp-InputArea-prompt">In [15]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">dbscan_results_df</span> <span class="o">=</span> <span class="n">results_df</span><span class="p">[</span><span class="n">results_df</span><span class="p">[</span><span class="s1">'algo'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'dbscan'</span><span class="p">]</span>
-<span class="n">dbscan_results_df</span> <span class="o">=</span> <span class="n">dbscan_results_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">'validity_index'</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">best_dbscan_results_df</span> <span class="o">=</span> <span class="n">dbscan_results_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<span class="n">best_dbscan_results_df</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># convert cluster_labels elements back to numpy array</span>
+<span class="n">results_df</span><span class="p">[</span><span class="s1">'cluster_labels'</span><span class="p">]</span> <span class="o">=</span> <span class="n">results_df</span><span class="p">[</span><span class="s1">'cluster_labels'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">exi</span><span class="o">.</span><span class="n">convert_string_to_array</span><span class="p">)</span>
 </pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[15]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>algo</th>
-<th>n_clusters_found</th>
-<th>n_clusters_db_score_is_min</th>
-<th>n_clusters_ch_score_is_max</th>
-<th>n_clusters_silhouette_score_is_max</th>
-<th>silhouette_score</th>
-<th>hopkins_statistic</th>
-<th>umap_n_neighbors</th>
-<th>umap_min_dist</th>
-<th>umap_metric</th>
-<th>umap_n_components</th>
-<th>trustworthiness</th>
-<th>eps</th>
-<th>dbscan_min_samples</th>
-<th>dbscan_metric</th>
-<th>validity_index</th>
-<th>noise_ratio</th>
-<th>cluster_labels</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>1</th>
-<td>dbscan</td>
-<td>2</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>0.003565</td>
-<td>1000</td>
-<td>0.1</td>
-<td>euclidean</td>
-<td>7</td>
-<td>0.999926</td>
-<td>0.088648</td>
-<td>5.0</td>
-<td>chebyshev</td>
-<td>0.641052</td>
-<td>0.0</td>
-<td>[0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, ...</td>
-</tr>
-</tbody>
-</table>
-</div>
 </div>
 </div>
 </div>
@@ -8439,8 +7655,7 @@ Noise Ratio:  0.009624568363823378
 <div class="jp-InputPrompt jp-InputArea-prompt">In [16]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">filtered_results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">best_dbscan_results_df</span><span class="p">,</span> <span class="n">best_kmeans_results_df</span><span class="p">])</span>
-<span class="n">filtered_results_df</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">target_df</span>
 </pre></div>
 </div>
 </div>
@@ -8471,71 +7686,69 @@ Noise Ratio:  0.009624568363823378
 <thead>
 <tr style="text-align: right;">
 <th></th>
-<th>algo</th>
-<th>n_clusters_found</th>
-<th>n_clusters_db_score_is_min</th>
-<th>n_clusters_ch_score_is_max</th>
-<th>n_clusters_silhouette_score_is_max</th>
-<th>silhouette_score</th>
-<th>hopkins_statistic</th>
-<th>umap_n_neighbors</th>
-<th>umap_min_dist</th>
-<th>umap_metric</th>
-<th>umap_n_components</th>
-<th>trustworthiness</th>
-<th>eps</th>
-<th>dbscan_min_samples</th>
-<th>dbscan_metric</th>
-<th>validity_index</th>
-<th>noise_ratio</th>
-<th>cluster_labels</th>
+<th>ID</th>
+<th>Target</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<th>1</th>
-<td>dbscan</td>
-<td>2</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>0.003565</td>
-<td>1000</td>
-<td>0.1</td>
-<td>euclidean</td>
-<td>7</td>
-<td>0.999926</td>
-<td>0.088648</td>
-<td>5.0</td>
-<td>chebyshev</td>
-<td>0.641052</td>
-<td>0.0</td>
-<td>[0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, ...</td>
+<th>0</th>
+<td>1488</td>
+<td>5</td>
 </tr>
 <tr>
-<th>0</th>
-<td>k_means</td>
-<td>15</td>
-<td>15.0</td>
-<td>15.0</td>
-<td>15.0</td>
-<td>0.516789</td>
-<td>0.002807</td>
-<td>1000</td>
-<td>0.0</td>
-<td>euclidean</td>
-<td>7</td>
-<td>0.999931</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>[12, 7, 5, 5, 1, 5, 10, 12, 4, 8, 14, 11, 6, 0...</td>
+<th>1</th>
+<td>2611</td>
+<td>0</td>
+</tr>
+<tr>
+<th>2</th>
+<td>749</td>
+<td>5</td>
+</tr>
+<tr>
+<th>3</th>
+<td>99</td>
+<td>5</td>
+</tr>
+<tr>
+<th>4</th>
+<td>11298</td>
+<td>3</td>
+</tr>
+<tr>
+<th>...</th>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<th>13606</th>
+<td>5191</td>
+<td>2</td>
+</tr>
+<tr>
+<th>13607</th>
+<td>13418</td>
+<td>3</td>
+</tr>
+<tr>
+<th>13608</th>
+<td>5390</td>
+<td>2</td>
+</tr>
+<tr>
+<th>13609</th>
+<td>860</td>
+<td>5</td>
+</tr>
+<tr>
+<th>13610</th>
+<td>7270</td>
+<td>4</td>
 </tr>
 </tbody>
 </table>
+<p>13611 rows × 2 columns</p>
 </div>
 </div>
 </div>
@@ -8549,7 +7762,8 @@ Noise Ratio:  0.009624568363823378
 <div class="jp-InputPrompt jp-InputArea-prompt">In [17]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">filtered_results_df</span><span class="p">[</span><span class="s1">'cluster_labels'</span><span class="p">]</span> <span class="o">=</span> <span class="n">filtered_results_df</span><span class="p">[</span><span class="s1">'cluster_labels'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s1">','</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># get the true number of clusters</span>
+<span class="n">num_true_labels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">target_df</span><span class="o">.</span><span class="n">Target</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -8563,7 +7777,49 @@ Noise Ratio:  0.009624568363823378
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <hr/>
-<h3 id="Save-Filtered-Results-to-CSV">Save Filtered Results to CSV<a class="anchor-link" href="#Save-Filtered-Results-to-CSV">¶</a></h3>
+<h3 id="Compute-External-Indices">Compute External Indices<a class="anchor-link" href="#Compute-External-Indices">¶</a></h3><hr/>
+<p>This cell will compute the external indices used to validate the clutering solution.</p>
+<p>The following external indices will the used:</p>
+<ul>
+<li><code>Adjusted Rand Score</code> <a href="#ref1">[1]</a><ul>
+<li>The Rand index is a measure similarity between two clustering solutions by considering all pairs of samples and counting pairs that are assigned in the same or different clusters in the predicted and true clusterings.</li>
+<li>This Rand index is then adjusted for change with:
+<br/><br/><ul>
+<li>$ARI = \dfrac{RI - \text{Expected\_RI}}{\textit{max(RI)} - \text{Expected\_RI}}$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>Jaccard</code> <a href="#ref1">[2]</a><ul>
+<li>The size of the intersection divided by the size of the union of the two labeled sets.</li>
+<li>We will use <code>average = macro</code>, this returns the mean of all the independently computed Jaccard indices for each true label. This is acceptble when the true label frequencies are similar.
+<br/><br/></li>
+</ul>
+</li>
+<li><code>Fawlks and Mallows Index</code><ul>
+<li>The geometric mean between precision and recall
+<br/><br/></li>
+<li>$FMI = \dfrac{TP}{\sqrt{(TP + FP) \cdot (TP + FN)}}$<a href="#ref1">[3]</a>
+<br/><br/></li>
+</ul>
+</li>
+<li><code>F-Measure</code> <a href="#ref1">[4]</a><ul>
+<li>The harmonic mean of the precision and recall.
+<br/><br/></li>
+<li>$F1 = \dfrac{2 \cdot TP}{2 \cdot TP + FP + FN}$
+<br/><br/></li>
+</ul>
+</li>
+<li><code>Purity ~ Homogeneity</code> <a href="#ref1">[5]</a><ul>
+<li>Homogeneity measures the extent to which cluster labels contain only elements of single class.</li>
+</ul>
+</li>
+</ul>
+<p id="ref1"><sup>[1]</sup> scikit-learn.org. More details available at <a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html">this link</a>.</p>
+<p id="ref1"><sup>[2]</sup> scikit-learn.org. More details available at <a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.jaccard_score.html">this link</a>.</p>
+<p id="ref1"><sup>[3]</sup> scikit-learn.org. More details available at <a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.fowlkes_mallows_score.html">this link</a>.</p>
+<p id="ref1"><sup>[4]</sup> scikit-learn.org. More details available at <a href="hhttps://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html">this link</a>.</p>
+<p id="ref1"><sup>[5]</sup> scikit-learn.org. More details available at <a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.homogeneity_score.html">this link</a>.</p>
 </div>
 </div>
 </div>
@@ -8575,8 +7831,158 @@ Noise Ratio:  0.009624568363823378
 <div class="jp-InputPrompt jp-InputArea-prompt">In [18]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">filtered_results_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">FILTERED_RESULTS_FILENAME</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Filtered results dataframe saved at:"</span><span class="p">,</span> <span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">FILTERED_RESULTS_FILENAME</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">dataframe_dict</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">df_row_dict_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'*'</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Results: </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'*'</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'UMAP &amp; CLUSTER ALGORITHM INFORMATION:'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'-'</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span>
+    
+    <span class="c1"># get algo</span>
+    <span class="n">algo</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">'algo'</span><span class="p">]</span>
+
+    <span class="c1">###################################################</span>
+    <span class="c1">### Get UMAP &amp; Cluster Algorithm Information ####</span>
+    <span class="c1">###################################################</span>
+
+    <span class="n">n_components</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">'umap_n_components'</span><span class="p">]</span>
+    <span class="n">min_dist</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">'umap_min_dist'</span><span class="p">]</span>
+    <span class="n">n_neighbors</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">'umap_n_neighbors'</span><span class="p">]</span>
+    <span class="n">trustworthiness</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">'trustworthiness'</span><span class="p">]</span>
+    <span class="n">n_clusters_found</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">'n_clusters_found'</span><span class="p">]</span>
+    <span class="n">validity_index</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">'validity_index'</span><span class="p">]</span>
+    <span class="n">silhouette_score</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">'silhouette_score'</span><span class="p">]</span>
+    <span class="n">umap_metric</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">'umap_metric'</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Algorithm: </span><span class="si">{</span><span class="n">algo</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Number of Clusers Found: </span><span class="si">{</span><span class="n">n_clusters_found</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">algo</span> <span class="o">==</span> <span class="s1">'dbscan'</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Validity Index: </span><span class="si">{</span><span class="n">validity_index</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Silhouette Score: </span><span class="si">{</span><span class="n">silhouette_score</span><span class="si">:</span><span class="s1">.5f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'UMAP Number of Components: </span><span class="si">{</span><span class="n">n_components</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'UMAP Min Distance: </span><span class="si">{</span><span class="n">min_dist</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'UMAP Number of Neighbors: </span><span class="si">{</span><span class="n">n_neighbors</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'UMAP Metric: </span><span class="si">{</span><span class="n">umap_metric</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'UMAP Trustworthiness: </span><span class="si">{</span><span class="n">trustworthiness</span><span class="si">:</span><span class="s1">.5f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+    <span class="c1"># create dataframe with columns for every value of n_components</span>
+    <span class="n">cluster_labels_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+
+    <span class="c1"># add cluster labels to dataframe from results_df</span>
+    <span class="n">cluster_labels_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_components</span><span class="p">)]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">'cluster_labels'</span><span class="p">]</span>
+
+    <span class="c1"># concatonat target vector dataframe with clusterlabels_df</span>
+    <span class="n">labels_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">target_df</span><span class="p">,</span> <span class="n">cluster_labels_df</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="c1"># drop indicies with noise points</span>
+    <span class="n">noise_points_row_indices</span> <span class="o">=</span> <span class="n">labels_df</span><span class="o">.</span><span class="n">index</span><span class="p">[(</span><span class="n">labels_df</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="n">labels_df</span> <span class="o">=</span> <span class="n">labels_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">noise_points_row_indices</span><span class="p">)</span>
+    <span class="n">labels_df</span> <span class="o">=</span> <span class="n">labels_df</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">'int64'</span><span class="p">)</span>
+
+    <span class="n">dataframe_dict</span><span class="p">[</span><span class="sa">f</span><span class="s1">'df_</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">n_components</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">labels_df</span>
+
+    <span class="c1"># get labels</span>
+    <span class="n">true_labels</span> <span class="o">=</span> <span class="n">labels_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">'Target'</span><span class="p">]</span>
+    <span class="n">cluster_labels</span> <span class="o">=</span> <span class="n">labels_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_components</span><span class="p">)]</span>
+
+    <span class="c1">########################################</span>
+    <span class="c1">######## Get External Indices #########</span>
+    <span class="c1">########################################</span>
+
+    <span class="c1"># get adj rand score and add to dataframe</span>
+    <span class="n">adj_rand</span> <span class="o">=</span> <span class="n">adjusted_rand_score</span><span class="p">(</span><span class="n">true_labels</span><span class="p">,</span> <span class="n">cluster_labels</span><span class="p">)</span>
+    <span class="n">results_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s1">'adjusted_rand_score'</span><span class="p">]</span> <span class="o">=</span> <span class="n">adj_rand</span>
+
+    <span class="c1"># get falks and mallows score</span>
+    <span class="n">fawlks_and_mallows_</span> <span class="o">=</span> <span class="n">fowlkes_mallows_score</span><span class="p">(</span><span class="n">true_labels</span><span class="p">,</span> <span class="n">cluster_labels</span><span class="p">)</span>
+
+    <span class="c1"># completeness</span>
+    <span class="n">homogeneity_score_</span> <span class="o">=</span> <span class="n">homogeneity_score</span><span class="p">(</span><span class="n">true_labels</span><span class="p">,</span> <span class="n">cluster_labels</span><span class="p">)</span>
+
+    <span class="c1"># get F-1 score</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">true_labels</span><span class="p">)</span>
+    <span class="n">f1_score_</span> <span class="o">=</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">true_labels</span><span class="p">,</span> <span class="n">cluster_labels</span><span class="p">,</span> <span class="n">average</span> <span class="o">=</span> <span class="s1">'macro'</span><span class="p">)</span>
+
+    <span class="c1"># jaccard score</span>
+    <span class="n">jaccard_score_</span> <span class="o">=</span> <span class="n">jaccard_score</span><span class="p">(</span><span class="n">true_labels</span><span class="p">,</span> <span class="n">cluster_labels</span><span class="p">,</span> <span class="n">average</span> <span class="o">=</span> <span class="s1">'macro'</span><span class="p">)</span>
+
+    <span class="c1"># ge the normalized mutual info score</span>
+    <span class="n">nmi</span> <span class="o">=</span> <span class="n">normalized_mutual_info_score</span><span class="p">(</span><span class="n">true_labels</span><span class="p">,</span> <span class="n">cluster_labels</span><span class="p">)</span>
+
+    <span class="c1"># get contigency matrices for all permutatons of cluster labels</span>
+    <span class="n">cont_matrix</span> <span class="o">=</span> <span class="n">contingency_matrix</span><span class="p">(</span><span class="n">true_labels</span><span class="p">,</span> <span class="n">cluster_labels</span><span class="p">)</span>
+    <span class="n">matrix_trace</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">cont_matrix</span><span class="p">)</span>
+
+    <span class="c1"># get optimized contingency matrix</span>
+    <span class="n">modes_df</span> <span class="o">=</span> <span class="n">exi</span><span class="o">.</span><span class="n">get_modes</span><span class="p">(</span><span class="n">n_components</span><span class="p">,</span> <span class="n">labels_df</span><span class="p">)</span>
+    <span class="n">cluster_mapping</span> <span class="o">=</span> <span class="n">exi</span><span class="o">.</span><span class="n">get_mapping</span><span class="p">(</span><span class="n">n_components</span><span class="p">,</span> <span class="n">labels_df</span><span class="p">,</span> <span class="n">modes_df</span><span class="p">)</span>
+    <span class="n">labels_df</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">n_components</span><span class="p">)]</span> <span class="o">=</span> <span class="n">labels_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_components</span><span class="p">)]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">cluster_mapping</span><span class="p">)</span>
+    <span class="n">remapped_cont_matrix</span> <span class="o">=</span> <span class="n">contingency_matrix</span><span class="p">(</span><span class="n">labels_df</span><span class="p">[</span><span class="s1">'Target'</span><span class="p">],</span> <span class="n">labels_df</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">n_components</span><span class="p">)])</span>
+    <span class="n">remapped_matrix_trace</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">remapped_cont_matrix</span><span class="p">)</span>
+
+    <span class="c1"># retrieve contigency matrix with highest trace</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'-'</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'CONTINGENCY MATRIX'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'-'</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'Contingency Matrix: '</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">cont_matrix</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'-'</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'REMAPPED CONTINGENCY MATRIX'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'-'</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'Best Mapping: '</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">cluster_mapping</span><span class="o">.</span><span class="n">items</span><span class="p">())))</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'Contingency Matrix: '</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">remapped_cont_matrix</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'-'</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'EXTERMAL INDICES: PERFORMANCE EVALUATION METRICS'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'-'</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Adjusted Rand Score: </span><span class="si">{</span><span class="n">adj_rand</span><span class="si">:</span><span class="s1">.5f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Fawlks and Mallows Score: </span><span class="si">{</span><span class="n">fawlks_and_mallows_</span><span class="si">:</span><span class="s1">.5f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'F-1 Score: </span><span class="si">{</span><span class="n">f1_score_</span><span class="si">:</span><span class="s1">.5f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Jaccard Score: </span><span class="si">{</span><span class="n">jaccard_score_</span><span class="si">:</span><span class="s1">.5f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Normalized Mutual Info Score: </span><span class="si">{</span><span class="n">nmi</span><span class="si">:</span><span class="s1">.5f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Homogeneity Score (Purity): </span><span class="si">{</span><span class="n">homogeneity_score_</span><span class="si">:</span><span class="s1">.5f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+
+    <span class="n">df_row_dict_list</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                        <span class="s1">'algo'</span><span class="p">:</span> <span class="n">algo</span><span class="p">,</span>
+                        <span class="s1">'umap_n_components'</span><span class="p">:</span> <span class="n">n_components</span><span class="p">,</span>
+                        <span class="s1">'umap_min_dist'</span><span class="p">:</span> <span class="n">min_dist</span><span class="p">,</span>
+                        <span class="s1">'umap_n_neighbors'</span><span class="p">:</span> <span class="n">n_neighbors</span><span class="p">,</span>
+                        <span class="s1">'umap_metric'</span><span class="p">:</span> <span class="n">umap_metric</span><span class="p">,</span>
+                        <span class="s1">'trustworthiness'</span><span class="p">:</span> <span class="n">trustworthiness</span><span class="p">,</span>
+                        <span class="s1">'n_clusters_found'</span><span class="p">:</span> <span class="n">n_clusters_found</span><span class="p">,</span>
+                        <span class="s1">'true_num_clusters'</span><span class="p">:</span> <span class="n">num_true_labels</span><span class="p">,</span>
+                        <span class="s1">'validity_index'</span><span class="p">:</span> <span class="n">validity_index</span><span class="p">,</span>
+                        <span class="s1">'adj_rand_score'</span><span class="p">:</span> <span class="n">adj_rand</span><span class="p">,</span>
+                        <span class="s1">'fawlks_and_mallows'</span><span class="p">:</span> <span class="n">fawlks_and_mallows_</span><span class="p">,</span>
+                        <span class="s1">'nmi'</span><span class="p">:</span> <span class="n">nmi</span><span class="p">,</span>
+                        <span class="s1">'jaccard_score'</span><span class="p">:</span> <span class="n">jaccard_score_</span><span class="p">,</span>
+                        <span class="s1">'f1_score'</span><span class="p">:</span> <span class="n">f1_score_</span><span class="p">,</span>
+                        <span class="s1">'Homogeneity'</span><span class="p">:</span> <span class="n">homogeneity_score_</span><span class="p">,</span>
+                        <span class="s1">'true_labels'</span><span class="p">:</span> <span class="n">true_labels</span><span class="p">,</span>
+                        <span class="s1">'cluster_labels'</span><span class="p">:</span> <span class="n">cluster_labels</span><span class="p">,</span>
+                        <span class="s1">'matrix_trace'</span><span class="p">:</span> <span class="n">matrix_trace</span><span class="p">,</span>
+                        <span class="s1">'contingency_matrix'</span><span class="p">:</span> <span class="n">cont_matrix</span><span class="p">,</span>
+                        <span class="s1">'remapped_cont_matrix'</span><span class="p">:</span> <span class="n">remapped_cont_matrix</span><span class="p">,</span>
+                        <span class="s1">'mapping'</span><span class="p">:</span> <span class="n">cluster_mapping</span>
+                        <span class="p">})</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
 </pre></div>
 </div>
 </div>
@@ -8589,21 +7995,122 @@ Noise Ratio:  0.009624568363823378
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Filtered results dataframe saved at: /Users/mikey/LocalFiles/DS5230/final_project/DS5230-final/data/results/filtered_results_2024-04-1812:46:17.162817.csv
+<pre>
+
+****************************************************************************************************
+Results: 1
+****************************************************************************************************
+
+UMAP &amp; CLUSTER ALGORITHM INFORMATION:
+----------------------------------------------------------------------------------------------------
+Algorithm: dbscan
+Number of Clusers Found: 4
+Validity Index: 0.99987
+UMAP Number of Components: 7
+UMAP Min Distance: 0
+UMAP Number of Neighbors: 1000
+UMAP Metric: cosine
+UMAP Trustworthiness: 0.84725
+
+----------------------------------------------------------------------------------------------------
+CONTINGENCY MATRIX
+----------------------------------------------------------------------------------------------------
+Contingency Matrix: 
+
+[[   7 1315    0    0]
+ [   0    0    0  522]
+ [   0 1630    0    0]
+ [   0 3546    0    0]
+ [   0 1928    0    0]
+ [1188   63  776    0]
+ [   0 2636    0    0]]
+
+----------------------------------------------------------------------------------------------------
+REMAPPED CONTINGENCY MATRIX
+----------------------------------------------------------------------------------------------------
+
+Best Mapping:  {0.0: 5.0, 1.0: 3.0, 2.0: 8, 3.0: 1.0}
+
+Contingency Matrix: 
+
+[[   0 1315    7    0]
+ [ 522    0    0    0]
+ [   0 1630    0    0]
+ [   0 3546    0    0]
+ [   0 1928    0    0]
+ [   0   63 1188  776]
+ [   0 2636    0    0]]
+
+----------------------------------------------------------------------------------------------------
+EXTERMAL INDICES: PERFORMANCE EVALUATION METRICS
+----------------------------------------------------------------------------------------------------
+
+Adjusted Rand Score: 0.14241
+Fawlks and Mallows Score: 0.47102
+F-1 Score: 0.00079
+Jaccard Score: 0.00040
+Normalized Mutual Info Score: 0.43696
+Homogeneity Score (Purity): 0.29794
+
+
+
+****************************************************************************************************
+Results: 2
+****************************************************************************************************
+
+UMAP &amp; CLUSTER ALGORITHM INFORMATION:
+----------------------------------------------------------------------------------------------------
+Algorithm: k_means
+Number of Clusers Found: 15
+Silhouette Score: 0.51679
+UMAP Number of Components: 7
+UMAP Min Distance: 0
+UMAP Number of Neighbors: 1000
+UMAP Metric: euclidean
+UMAP Trustworthiness: 0.99993
+
+----------------------------------------------------------------------------------------------------
+CONTINGENCY MATRIX
+----------------------------------------------------------------------------------------------------
+Contingency Matrix: 
+
+[[  0   0   0 602   0   0   0 720   0   0   0   0   0   0   0]
+ [  0   0   0 296 226   0   0   0   0   0   0   0   0   0   0]
+ [  0   0   0   0 822   0   0   0   0   0 808   0   0   0   0]
+ [  0 931   0   0   0   0 829   0 862   0   0 127   0   0 797]
+ [986   0   0   0   0   0   0   0   0   0 114   0   0 828   0]
+ [  0   0   0   0   0 872   0 267   0   0   0   0 888   0   0]
+ [  0   0 849   0   0   0   0   0   0 921   0 762   0 104   0]]
+
+----------------------------------------------------------------------------------------------------
+REMAPPED CONTINGENCY MATRIX
+----------------------------------------------------------------------------------------------------
+
+Best Mapping:  {0.0: 4.0, 1.0: 3.0, 2.0: 8, 3.0: 16, 4.0: 2.0, 5.0: 10, 6.0: 13, 7.0: 0.0, 8.0: 12, 9.0: 6.0, 10.0: 15, 11.0: 9, 12.0: 5.0, 13.0: 11, 14.0: 14}
+
+Contingency Matrix: 
+
+[[720   0   0   0   0   0   0   0   0   0   0   0   0   0 602]
+ [  0 226   0   0   0   0   0   0   0   0   0   0   0   0 296]
+ [  0 822   0   0   0   0   0   0   0   0   0   0   0 808   0]
+ [  0   0 931   0   0   0   0 127   0   0 862 829 797   0   0]
+ [  0   0   0 986   0   0   0   0   0 828   0   0   0 114   0]
+ [267   0   0   0 888   0   0   0 872   0   0   0   0   0   0]
+ [  0   0   0   0   0 921 849 762   0 104   0   0   0   0   0]]
+
+----------------------------------------------------------------------------------------------------
+EXTERMAL INDICES: PERFORMANCE EVALUATION METRICS
+----------------------------------------------------------------------------------------------------
+
+Adjusted Rand Score: 0.42827
+Fawlks and Mallows Score: 0.53885
+F-1 Score: 0.04011
+Jaccard Score: 0.02868
+Normalized Mutual Info Score: 0.71985
+Homogeneity Score (Purity): 0.89077
+
 </pre>
 </div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h2 id="Runtime">Runtime<a class="anchor-link" href="#Runtime">¶</a></h2>
 </div>
 </div>
 </div>
@@ -8615,11 +8122,9 @@ Noise Ratio:  0.009624568363823378
 <div class="jp-InputPrompt jp-InputArea-prompt">In [19]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">finish</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="n">hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">finish</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">//</span> <span class="mi">3600</span><span class="p">)</span>
-<span class="n">minutes</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">finish</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3600</span><span class="p">)</span> <span class="o">//</span> <span class="mi">60</span><span class="p">)</span>
-<span class="n">seconds</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">finish</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">%</span> <span class="mi">60</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Total Run Time(hh:mm.ss): </span><span class="si">{</span><span class="n">hours</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">minutes</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">seconds</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">matrix_results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">df_row_dict_list</span><span class="p">)</span>
+
+<span class="n">matrix_results_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">'adj_rand_score'</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -8629,11 +8134,221 @@ Noise Ratio:  0.009624568363823378
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Total Run Time(hh:mm.ss): 00:13.49
-</pre>
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[19]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>algo</th>
+<th>umap_n_components</th>
+<th>umap_min_dist</th>
+<th>umap_n_neighbors</th>
+<th>umap_metric</th>
+<th>trustworthiness</th>
+<th>n_clusters_found</th>
+<th>true_num_clusters</th>
+<th>validity_index</th>
+<th>adj_rand_score</th>
+<th>...</th>
+<th>nmi</th>
+<th>jaccard_score</th>
+<th>f1_score</th>
+<th>Homogeneity</th>
+<th>true_labels</th>
+<th>cluster_labels</th>
+<th>matrix_trace</th>
+<th>contingency_matrix</th>
+<th>remapped_cont_matrix</th>
+<th>mapping</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>1</th>
+<td>k_means</td>
+<td>7</td>
+<td>0</td>
+<td>1000</td>
+<td>euclidean</td>
+<td>0.999931</td>
+<td>15</td>
+<td>7</td>
+<td>NaN</td>
+<td>0.428273</td>
+<td>...</td>
+<td>0.719847</td>
+<td>0.028679</td>
+<td>0.040106</td>
+<td>0.890770</td>
+<td>0        5
+1        0
+2        5
+3        5
+4 ...</td>
+<td>0        12
+1         7
+2         5
+3         ...</td>
+<td>872</td>
+<td>[[0, 0, 0, 602, 0, 0, 0, 720, 0, 0, 0, 0, 0, 0...</td>
+<td>[[720, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...</td>
+<td>{9.0: 6.0, 2.0: 8, 11.0: 9, 12.0: 5.0, 5.0: 10...</td>
+</tr>
+<tr>
+<th>0</th>
+<td>dbscan</td>
+<td>7</td>
+<td>0</td>
+<td>1000</td>
+<td>cosine</td>
+<td>0.847250</td>
+<td>4</td>
+<td>7</td>
+<td>0.999869</td>
+<td>0.142414</td>
+<td>...</td>
+<td>0.436957</td>
+<td>0.000398</td>
+<td>0.000795</td>
+<td>0.297941</td>
+<td>0        5
+1        0
+2        5
+3        5
+4 ...</td>
+<td>0        0
+1        1
+2        0
+3        2
+4 ...</td>
+<td>7</td>
+<td>[[7, 1315, 0, 0], [0, 0, 0, 522], [0, 1630, 0,...</td>
+<td>[[0, 1315, 7, 0], [522, 0, 0, 0], [0, 1630, 0,...</td>
+<td>{0.0: 5.0, 2.0: 8, 1.0: 3.0, 3.0: 1.0}</td>
+</tr>
+</tbody>
+</table>
+<p>2 rows × 21 columns</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [20]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">keep_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'true_num_clusters'</span><span class="p">,</span> <span class="s1">'umap_n_components'</span><span class="p">,</span><span class="s1">'umap_min_dist'</span><span class="p">,</span> 
+             <span class="s1">'umap_n_neighbors'</span><span class="p">,</span> <span class="s1">'umap_metric'</span><span class="p">,</span> <span class="s1">'trustworthiness'</span><span class="p">,</span> <span class="s1">'algo'</span><span class="p">,</span> <span class="s1">'n_clusters_found'</span><span class="p">,</span>
+            <span class="s1">'validity_index'</span><span class="p">,</span> <span class="s1">'adj_rand_score'</span><span class="p">,</span> <span class="s1">'fawlks_and_mallows'</span><span class="p">,</span> <span class="s1">'nmi'</span><span class="p">,</span> <span class="s1">'jaccard_score'</span><span class="p">,</span> <span class="s1">'f1_score'</span><span class="p">]</span>
+
+<span class="n">finalized_results_frame</span> <span class="o">=</span> <span class="n">matrix_results_df</span><span class="p">[</span><span class="n">keep_cols</span><span class="p">]</span>
+
+<span class="n">finalized_results_frame</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[20]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>true_num_clusters</th>
+<th>umap_n_components</th>
+<th>umap_min_dist</th>
+<th>umap_n_neighbors</th>
+<th>umap_metric</th>
+<th>trustworthiness</th>
+<th>algo</th>
+<th>n_clusters_found</th>
+<th>validity_index</th>
+<th>adj_rand_score</th>
+<th>fawlks_and_mallows</th>
+<th>nmi</th>
+<th>jaccard_score</th>
+<th>f1_score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>7</td>
+<td>7</td>
+<td>0</td>
+<td>1000</td>
+<td>cosine</td>
+<td>0.847250</td>
+<td>dbscan</td>
+<td>4</td>
+<td>0.999869</td>
+<td>0.142414</td>
+<td>0.471018</td>
+<td>0.436957</td>
+<td>0.000398</td>
+<td>0.000795</td>
+</tr>
+<tr>
+<th>1</th>
+<td>7</td>
+<td>7</td>
+<td>0</td>
+<td>1000</td>
+<td>euclidean</td>
+<td>0.999931</td>
+<td>k_means</td>
+<td>15</td>
+<td>NaN</td>
+<td>0.428273</td>
+<td>0.538846</td>
+<td>0.719847</td>
+<td>0.028679</td>
+<td>0.040106</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>

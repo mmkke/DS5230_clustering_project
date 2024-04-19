@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>ds5230_phase3_clustering_optimization</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>ds5230_afd</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7482,12 +7482,23 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Final-Project:-Phase-3---Clustering-Pipeline-Optimization">Final Project: Phase 3 - Clustering Pipeline Optimization<a class="anchor-link" href="#Final-Project:-Phase-3---Clustering-Pipeline-Optimization">¶</a></h2><p>Spring 2024<br/>
+<h2 id="Final-Project:-Phase-3---Avoiding-False-Discoveries">Final Project: Phase 3 - Avoiding False Discoveries<a class="anchor-link" href="#Final-Project:-Phase-3---Avoiding-False-Discoveries">¶</a></h2><p>Spring 2024<br/>
 Group: Michael Massone and Joseph Nelson Farrell<br/>
 DS 5230 Unsupervised Machine Learning<br/>
 Professor Steven Morin, PhD<br/>
-Due: 04/21/2024</p>
+Due: 04/17/2024</p>
 <hr/>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Import-Libraries">Import Libraries<a class="anchor-link" href="#Import-Libraries">¶</a></h3>
 </div>
 </div>
 </div>
@@ -7499,42 +7510,21 @@ Due: 04/21/2024</p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1">## Libraries</span>
-
-<span class="c1"># base</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># base</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
 
-<span class="kn">import</span> <span class="nn">random</span>
-
-
-<span class="c1"># preprocessing</span>
-<span class="kn">from</span> <span class="nn">sklearn.utils</span> <span class="kn">import</span> <span class="n">shuffle</span>
-<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
-
-<span class="c1"># data</span>
-<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_digits</span>
-
-<span class="c1"># clustering</span>
-<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">DBSCAN</span><span class="p">,</span> <span class="n">KMeans</span>
-
-<span class="c1">#external indices</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics.cluster</span> <span class="kn">import</span> <span class="n">adjusted_rand_score</span><span class="p">,</span> <span class="n">contingency_matrix</span>
-
-<span class="c1"># runtime and run tracking</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 
 <span class="c1"># pathing</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">umap</span>
 
-<span class="c1"># Disable runtime warnings</span>
-<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">"ignore"</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">RuntimeWarning</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">time</span>
 </pre></div>
 </div>
 </div>
@@ -7574,8 +7564,7 @@ Due: 04/21/2024</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Define-File-Paths">Define File Paths<a class="anchor-link" href="#Define-File-Paths">¶</a></h3>
+<h3 id="Set-Paths">Set Paths<a class="anchor-link" href="#Set-Paths">¶</a></h3>
 </div>
 </div>
 </div>
@@ -7588,23 +7577,24 @@ Due: 04/21/2024</p>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># define path</span>
-<span class="n">NB_PATH</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">NB_PATH</span><span class="p">)</span>
-<span class="n">PATH</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">NB_PATH</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">PATH</span><span class="p">)</span>
+<span class="n">HOME</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">HOME</span><span class="p">)</span>
+
+<span class="n">HOME_PARENT_STR</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">HOME</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">HOME_PARENT_STR</span><span class="p">)</span>
 
 <span class="c1"># path to figs folder</span>
-<span class="n">FIGS_PATH</span> <span class="o">=</span> <span class="n">PATH</span> <span class="o">+</span> <span class="s1">'/figs'</span>
+<span class="n">PATH_TO_FIGS_FOLDER</span> <span class="o">=</span> <span class="n">HOME_PARENT_STR</span> <span class="o">+</span> <span class="s1">'/figs'</span>
 
 <span class="c1"># path to data</span>
-<span class="n">DATA_PATH</span><span class="o">=</span> <span class="n">PATH</span> <span class="o">+</span> <span class="s1">'/data'</span>
+<span class="n">PATH_TO_DATA_FOLDER</span> <span class="o">=</span> <span class="n">HOME_PARENT_STR</span> <span class="o">+</span> <span class="s1">'/data'</span>
 
 <span class="c1"># path to src folder</span>
-<span class="n">SRC_PATH</span> <span class="o">=</span> <span class="n">PATH</span> <span class="o">+</span> <span class="s1">'/src'</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">SRC_PATH</span><span class="p">)</span>
+<span class="n">PATH_TO_SRC</span> <span class="o">=</span> <span class="n">HOME_PARENT_STR</span> <span class="o">+</span> <span class="s1">'/src'</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">PATH_TO_SRC</span><span class="p">)</span>
 
 <span class="c1"># sys path</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SRC_PATH</span><span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">PATH_TO_SRC</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7632,8 +7622,7 @@ Due: 04/21/2024</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Import-Modules">Import Modules<a class="anchor-link" href="#Import-Modules">¶</a></h3>
+<h3 id="Import-Functions">Import Functions<a class="anchor-link" href="#Import-Functions">¶</a></h3>
 </div>
 </div>
 </div>
@@ -7645,11 +7634,8 @@ Due: 04/21/2024</p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># modules and util</span>
-<span class="kn">import</span> <span class="nn">dimensionality_reduction</span> <span class="k">as</span> <span class="nn">dr</span>
-<span class="kn">import</span> <span class="nn">clustering</span> <span class="k">as</span> <span class="nn">cl</span>
-<span class="kn">from</span> <span class="nn">cluster_utils</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">external_indices_utils</span> <span class="kn">import</span> <span class="o">*</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">afd_utils</span>
+<span class="kn">import</span> <span class="nn">cluster_utils</span>
 </pre></div>
 </div>
 </div>
@@ -7662,8 +7648,7 @@ Due: 04/21/2024</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Parameters">Parameters<a class="anchor-link" href="#Parameters">¶</a></h3>
+<h3 id="Import-Data">Import Data<a class="anchor-link" href="#Import-Data">¶</a></h3>
 </div>
 </div>
 </div>
@@ -7675,23 +7660,8 @@ Due: 04/21/2024</p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># transformed data csv file name</span>
-<span class="n">DESIGN_FILE</span> <span class="o">=</span> <span class="s1">'/curated/shuffled_design.csv'</span>
-
-<span class="c1"># target vector csv file name</span>
-<span class="n">TARGET_FILE</span> <span class="o">=</span> <span class="s2">"/curated/shuffled_target.csv"</span>
-
-<span class="c1"># sampled target dataframe csv loc</span>
-<span class="n">TARGET_VECTOR_SHUFFLED_FILENAME</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'/sampled/sampled_target</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span><span class="w"> </span><span class="s2">""</span><span class="p">)</span><span class="si">}</span><span class="s1">.csv'</span>
-
-<span class="c1"># sampled design dataframe csv loc</span>
-<span class="n">DESIGN_MATRIX_SHUFFLED_FILENAME</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'/sampled/sampled_design</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span><span class="w"> </span><span class="s2">""</span><span class="p">)</span><span class="si">}</span><span class="s1">.csv'</span>
-
-<span class="c1"># all results dataframe csv loc</span>
-<span class="n">ALL_RESULTS_FILENAME</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'/results/all_results_</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span><span class="w"> </span><span class="s2">""</span><span class="p">)</span><span class="si">}</span><span class="s1">.csv'</span>
-
-<span class="c1"># filtered results dataframe csv loc</span>
-<span class="n">FILTERED_RESULTS_FILENAME</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'/results/filtered_results_</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span><span class="w"> </span><span class="s2">""</span><span class="p">)</span><span class="si">}</span><span class="s1">.csv'</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">results_frame_file</span> <span class="o">=</span>  <span class="s1">'/results/filtered_results_2024-04-1813:01:34.137038.csv'</span>
+<span class="n">results_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">PATH_TO_DATA_FOLDER</span> <span class="o">+</span> <span class="n">results_frame_file</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7704,12 +7674,11 @@ Due: 04/21/2024</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Load-Data">Load Data<a class="anchor-link" href="#Load-Data">¶</a></h3>
+<h3 id="Check-for-Kmeans">Check for Kmeans<a class="anchor-link" href="#Check-for-Kmeans">¶</a></h3>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7717,15 +7686,41 @@ Due: 04/21/2024</p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">target_vector_shuffled</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">TARGET_FILE</span><span class="p">)</span>
-
-<span class="n">design_matrix_shuffled</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">DESIGN_FILE</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># check if there is a Kmeans solution</span>
+<span class="k">if</span> <span class="s1">'k_means'</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">results_frame</span><span class="p">[</span><span class="s1">'algo'</span><span class="p">]):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"There is a Kmeans Solution. Proceed"</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'There is not Kmeans solution to check. Exit notebook.'</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>There is a Kmeans Solution. Proceed
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Filter-for-Kmeans">Filter for Kmeans<a class="anchor-link" href="#Filter-for-Kmeans">¶</a></h3>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7733,8 +7728,84 @@ Due: 04/21/2024</p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#design_matrix_shuffled = design_matrix_shuffled.loc[:, :'numerical__ShapeFactor1']</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># filter results for k_means solution</span>
+<span class="n">results_frame</span> <span class="o">=</span> <span class="n">results_frame</span><span class="p">[</span><span class="n">results_frame</span><span class="p">[</span><span class="s2">"algo"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"k_means"</span><span class="p">]</span>
+<span class="n">results_frame</span>
 </pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[7]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>algo</th>
+<th>n_clusters_found</th>
+<th>n_clusters_db_score_is_min</th>
+<th>n_clusters_ch_score_is_max</th>
+<th>n_clusters_silhouette_score_is_max</th>
+<th>silhouette_score</th>
+<th>hopkins_statistic</th>
+<th>umap_n_neighbors</th>
+<th>umap_min_dist</th>
+<th>umap_metric</th>
+<th>umap_n_components</th>
+<th>trustworthiness</th>
+<th>eps</th>
+<th>dbscan_min_samples</th>
+<th>dbscan_metric</th>
+<th>validity_index</th>
+<th>noise_ratio</th>
+<th>cluster_labels</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>1</th>
+<td>k_means</td>
+<td>15</td>
+<td>15.0</td>
+<td>15.0</td>
+<td>15.0</td>
+<td>0.519526</td>
+<td>0.002861</td>
+<td>750</td>
+<td>0.0</td>
+<td>euclidean</td>
+<td>7</td>
+<td>0.999954</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>5,14,7,7,9,5,4,5,12,13,1,6,11,0,13,12,1,2,14,6...</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>
@@ -7746,12 +7817,11 @@ Due: 04/21/2024</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Sample-Data">Sample Data<a class="anchor-link" href="#Sample-Data">¶</a></h3>
+<h3 id="Get-Best-Kmeans">Get Best Kmeans<a class="anchor-link" href="#Get-Best-Kmeans">¶</a></h3>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7759,25 +7829,85 @@ Due: 04/21/2024</p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">sample</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="k">if</span> <span class="n">sample</span><span class="p">:</span>
-    <span class="c1"># num samples</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="mi">1000</span>
-
-    <span class="c1"># random seed</span>
-    <span class="n">rand_seed</span> <span class="o">=</span> <span class="mi">42</span>
-
-    <span class="c1"># sample target and save copy to csv</span>
-    <span class="n">target_vector_shuffled</span> <span class="o">=</span> <span class="n">target_vector_shuffled</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">rand_seed</span><span class="p">)</span>
-    <span class="n">target_vector_shuffled</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">TARGET_VECTOR_SHUFFLED_FILENAME</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Sampled target dataframe saved at:"</span><span class="p">,</span> <span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">TARGET_VECTOR_SHUFFLED_FILENAME</span><span class="p">)</span>
-
-
-     <span class="c1"># sample target and save copy to csv</span>
-    <span class="n">design_matrix_shuffled</span> <span class="o">=</span> <span class="n">design_matrix_shuffled</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">rand_seed</span><span class="p">)</span>
-    <span class="n">design_matrix_shuffled</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">DESIGN_MATRIX_SHUFFLED_FILENAME</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Sampled design dataframe saved at:"</span><span class="p">,</span> <span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">DESIGN_MATRIX_SHUFFLED_FILENAME</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">results_frame</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">'silhouette_score'</span><span class="p">,</span> <span class="n">ascending</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">inplace</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">results_frame</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">best_result</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">results_frame</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:])</span><span class="o">.</span><span class="n">T</span>
+<span class="n">best_result</span>
 </pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[8]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>algo</th>
+<th>n_clusters_found</th>
+<th>n_clusters_db_score_is_min</th>
+<th>n_clusters_ch_score_is_max</th>
+<th>n_clusters_silhouette_score_is_max</th>
+<th>silhouette_score</th>
+<th>hopkins_statistic</th>
+<th>umap_n_neighbors</th>
+<th>umap_min_dist</th>
+<th>umap_metric</th>
+<th>umap_n_components</th>
+<th>trustworthiness</th>
+<th>eps</th>
+<th>dbscan_min_samples</th>
+<th>dbscan_metric</th>
+<th>validity_index</th>
+<th>noise_ratio</th>
+<th>cluster_labels</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>k_means</td>
+<td>15</td>
+<td>15.0</td>
+<td>15.0</td>
+<td>15.0</td>
+<td>0.519526</td>
+<td>0.002861</td>
+<td>750</td>
+<td>0.0</td>
+<td>euclidean</td>
+<td>7</td>
+<td>0.999954</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>5,14,7,7,9,5,4,5,12,13,1,6,11,0,13,12,1,2,14,6...</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>
@@ -7789,8 +7919,7 @@ Due: 04/21/2024</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Create-capX">Create capX<a class="anchor-link" href="#Create-capX">¶</a></h3>
+<h3 id="Get-Cap-X">Get Cap X<a class="anchor-link" href="#Get-Cap-X">¶</a></h3>
 </div>
 </div>
 </div>
@@ -7802,14 +7931,37 @@ Due: 04/21/2024</p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># drop ID col</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># get the design matrix</span>
+<span class="n">design_file</span> <span class="o">=</span> <span class="s1">'/curated/shuffled_design.csv'</span>
+<span class="n">design_matrix_shuffled</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">PATH_TO_DATA_FOLDER</span> <span class="o">+</span> <span class="n">design_file</span><span class="p">)</span>
+
+<span class="c1"># drop ID col</span>
 <span class="n">design_matrix_shuffled_noID</span> <span class="o">=</span> <span class="n">design_matrix_shuffled</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">'ID'</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># convert to ndarray</span>
 <span class="n">cap_x</span> <span class="o">=</span> <span class="n">design_matrix_shuffled_noID</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
 <span class="n">cap_x</span> <span class="o">=</span> <span class="n">design_matrix_shuffled</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'cap_x shape: </span><span class="si">{</span><span class="n">cap_x</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 <span class="n">cap_x</span><span class="o">.</span><span class="n">shape</span>
+
+<span class="c1"># get umap hypers from results frame</span>
+<span class="n">n_neighbors</span> <span class="o">=</span> <span class="n">results_frame</span><span class="p">[</span><span class="s1">'umap_n_neighbors'</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">n_components</span> <span class="o">=</span> <span class="n">results_frame</span><span class="p">[</span><span class="s1">'umap_n_components'</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">metric</span> <span class="o">=</span> <span class="n">results_frame</span><span class="p">[</span><span class="s1">'umap_metric'</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">min_dist</span> <span class="o">=</span> <span class="n">results_frame</span><span class="p">[</span><span class="s1">'umap_min_dist'</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># get the latent embedding discovered in the gridsearch</span>
+<span class="n">reducer</span> <span class="o">=</span> <span class="n">umap</span><span class="o">.</span><span class="n">UMAP</span><span class="p">(</span>
+        <span class="n">n_neighbors</span> <span class="o">=</span> <span class="n">n_neighbors</span><span class="p">,</span> 
+        <span class="n">n_components</span> <span class="o">=</span> <span class="n">n_components</span><span class="p">,</span> 
+        <span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span><span class="p">,</span> 
+        <span class="n">min_dist</span> <span class="o">=</span> <span class="n">min_dist</span><span class="p">,</span> 
+        <span class="n">spread</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> 
+        <span class="n">random_state</span> <span class="o">=</span> <span class="mi">42</span>
+        <span class="p">)</span>
+
+<span class="c1"># fit and embed</span>
+<span class="n">reducer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">cap_x</span><span class="p">)</span>
+<span class="n">embedding</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">cap_x</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7821,32 +7973,15 @@ Due: 04/21/2024</p>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>cap_x shape: (13611, 17)
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/umap/umap_.py:1943: UserWarning: n_jobs value -1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(f"n_jobs value {self.n_jobs} overridden to 1 by setting random_state. Use no seed for parallelism.")
 </pre>
 </div>
 </div>
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[9]:</div>
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
-<pre>(13611, 17)</pre>
 </div>
 </div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Select-Hyperparameters-for-Gridsearch">Select Hyperparameters for Gridsearch<a class="anchor-link" href="#Select-Hyperparameters-for-Gridsearch">¶</a></h3>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7854,64 +7989,167 @@ Due: 04/21/2024</p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># select hyperparams</span>
-<span class="n">params1</span><span class="o">=</span><span class="kc">False</span>
-<span class="n">params2</span><span class="o">=</span><span class="kc">False</span>
-<span class="n">params3</span><span class="o">=</span><span class="kc">False</span>
-<span class="n">params4</span><span class="o">=</span><span class="kc">False</span>
-<span class="n">params5</span><span class="o">=</span><span class="kc">True</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># create results list</span>
+<span class="n">results_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">n_clusters</span> <span class="o">=</span> <span class="n">results_frame</span><span class="p">[</span><span class="s1">'n_clusters_found'</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
-<span class="k">if</span> <span class="n">params1</span><span class="p">:</span>
+<span class="c1"># get sil score of cap_x</span>
+<span class="n">silhouette_score_cap_x</span> <span class="o">=</span> <span class="n">afd_utils</span><span class="o">.</span><span class="n">cluster_kmeans</span><span class="p">(</span><span class="n">embedding</span><span class="p">,</span> <span class="n">n_clusters</span><span class="p">)</span>
+<span class="n">results_list</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">'data'</span><span class="p">:</span> <span class="s1">'cap_x'</span><span class="p">,</span> <span class="s1">'silhouette_score'</span><span class="p">:</span> <span class="n">silhouette_score_cap_x</span><span class="p">})</span>
 
-    <span class="n">min_dist_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
-    <span class="n">n_neighbors_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">]</span>
-    <span class="n">metric_list</span> <span class="o">=</span><span class="p">[</span><span class="s1">'euclidean'</span><span class="p">,</span> <span class="s1">'canberra'</span><span class="p">,</span> <span class="s1">'mahalanobis'</span><span class="p">,</span> <span class="s1">'correlation'</span><span class="p">]</span>
-    <span class="n">n_components_list</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="c1"># generate and cluster random data</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">40</span><span class="p">):</span>
+    <span class="n">random_data</span> <span class="o">=</span> <span class="n">afd_utils</span><span class="o">.</span><span class="n">get_randomly_distributed_data</span><span class="p">(</span><span class="n">embedding</span><span class="p">,</span> <span class="n">seed</span> <span class="o">=</span> <span class="n">i</span><span class="p">)</span>
+    <span class="n">silhouette_score_random</span> <span class="o">=</span> <span class="n">afd_utils</span><span class="o">.</span><span class="n">cluster_kmeans</span><span class="p">(</span><span class="n">random_data</span><span class="p">,</span> <span class="n">n_clusters</span><span class="p">)</span>
+    <span class="n">results_list</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">'data'</span><span class="p">:</span> <span class="s1">'random'</span><span class="p">,</span> <span class="s1">'silhouette_score'</span><span class="p">:</span> <span class="n">silhouette_score_random</span><span class="p">})</span>
 
-
-<span class="k">if</span> <span class="n">params2</span><span class="p">:</span>
-
-    <span class="n">min_dist_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]</span>
-    <span class="n">n_neighbors_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">750</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span>
-    <span class="n">metric_list</span> <span class="o">=</span><span class="p">[</span><span class="s1">'cosine'</span><span class="p">,</span> <span class="s1">'euclidean'</span><span class="p">]</span>
-    <span class="n">n_components_list</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
-
-
-<span class="k">if</span> <span class="n">params3</span><span class="p">:</span>
-
-    <span class="n">min_dist_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]</span>
-    <span class="n">n_neighbors_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1500</span><span class="p">]</span>
-    <span class="n">metric_list</span> <span class="o">=</span><span class="p">[</span><span class="s1">'euclidean'</span><span class="p">,</span> <span class="s1">'cosine'</span><span class="p">]</span>
-    <span class="n">n_components_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">]</span>
-
-
-<span class="k">if</span> <span class="n">params4</span><span class="p">:</span>
-
-    <span class="n">min_dist_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span>
-    <span class="n">n_neighbors_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">750</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span>
-    <span class="n">metric_list</span> <span class="o">=</span><span class="p">[</span><span class="s1">'cosine'</span><span class="p">,</span> <span class="s1">'euclidean'</span><span class="p">]</span>
-    <span class="n">n_components_list</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
-
-<span class="k">if</span> <span class="n">params5</span><span class="p">:</span>
-
-    <span class="n">min_dist_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
-    <span class="n">n_neighbors_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1000</span><span class="p">]</span>
-    <span class="n">metric_list</span> <span class="o">=</span><span class="p">[</span><span class="s1">'euclidean'</span><span class="p">]</span>
-    <span class="n">n_components_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+<span class="c1"># convert to results frame</span>
+<span class="n">results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">results_list</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">results_df</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/sklearn/cluster/_kmeans.py:1412: FutureWarning: The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+  super()._check_params_vs_input(X, default_n_init=10)
+</pre>
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Gridsearch-Algorithm">Gridsearch Algorithm<a class="anchor-link" href="#Gridsearch-Algorithm">¶</a></h3>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>      data  silhouette_score
+0    cap_x          0.519437
+1   random          0.115390
+2   random          0.116928
+3   random          0.115378
+4   random          0.115029
+5   random          0.115189
+6   random          0.114670
+7   random          0.114130
+8   random          0.115740
+9   random          0.115210
+10  random          0.113970
+11  random          0.115522
+12  random          0.114791
+13  random          0.115305
+14  random          0.115695
+15  random          0.114686
+16  random          0.114310
+17  random          0.114742
+18  random          0.115553
+19  random          0.113913
+20  random          0.115188
+21  random          0.115012
+22  random          0.115063
+23  random          0.114626
+24  random          0.113124
+25  random          0.114069
+26  random          0.115853
+27  random          0.114138
+28  random          0.114928
+29  random          0.116331
+30  random          0.114322
+31  random          0.113506
+32  random          0.113853
+33  random          0.114774
+34  random          0.114639
+35  random          0.115103
+36  random          0.115437
+37  random          0.114444
+38  random          0.114941
+39  random          0.114549
+40  random          0.114463
+</pre>
+</div>
 </div>
 </div>
 </div>
@@ -7923,20 +8161,13 @@ Due: 04/21/2024</p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">runs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">n_components_list</span><span class="p">)</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">min_dist_list</span><span class="p">)</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">n_neighbors_list</span><span class="p">)</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">metric_list</span><span class="p">)</span>
-<span class="n">run</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">df_row_dict_list</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">n_components</span> <span class="ow">in</span> <span class="n">n_components_list</span><span class="p">:</span>
-  <span class="k">for</span> <span class="n">min_dist</span> <span class="ow">in</span> <span class="n">min_dist_list</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">n_neighbors</span> <span class="ow">in</span> <span class="n">n_neighbors_list</span><span class="p">:</span> 
-      <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metric_list</span><span class="p">:</span>
-        <span class="n">run</span> <span class="o">+=</span><span class="mi">1</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">'*'</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Run </span><span class="si">{</span><span class="n">run</span><span class="si">}</span><span class="s1"> of </span><span class="si">{</span><span class="n">runs</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="n">results_dict</span> <span class="o">=</span> <span class="n">dr</span><span class="o">.</span><span class="n">umap_dim_red</span><span class="p">(</span><span class="n">cap_x</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">min_dist</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">n_components</span><span class="p">)</span> 
-        <span class="n">df_row_dict</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">clustering</span><span class="p">(</span><span class="n">results_dict</span><span class="p">)</span>
-        <span class="n">df_row_dict_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_row_dict</span><span class="p">)</span>
-<span class="n">results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">df_row_dict_list</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">results_df</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="s1">'silhouette_score'</span><span class="p">,</span> <span class="n">hue</span> <span class="o">=</span> <span class="s1">'data'</span><span class="p">)</span>
+<span class="n">sil_max</span> <span class="o">=</span> <span class="n">results_df</span><span class="p">[</span><span class="s1">'silhouette_score'</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="n">sil_min</span> <span class="o">=</span> <span class="n">results_df</span><span class="p">[</span><span class="s1">'silhouette_score'</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="n">sil_min</span> <span class="o">-</span> <span class="mf">.05</span><span class="p">,</span> <span class="n">sil_max</span> <span class="o">+</span> <span class="mf">0.05</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">PATH_TO_FIGS_FOLDER</span> <span class="o">+</span> <span class="s1">'sig_test.png'</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">'tight'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -7948,649 +8179,8 @@ Due: 04/21/2024</p>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>****************************************************************************************************
-Run 1 of 3
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/umap/umap_.py:1943: UserWarning: n_jobs value -1 overridden to 1 by setting random_state. Use no seed for parallelism.
-  warn(f"n_jobs value {self.n_jobs} overridden to 1 by setting random_state. Use no seed for parallelism.")
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>****************************************************************************************************
-****************************************************************************************************
-Hyperparameters:
-n_neighbors:  1000
-min_dist:  0
-metric:  euclidean
-n_components:  7
-Hopkin's Statistic = 0.002807245746021458
-Test2 Pass: Kmeans successfully clustered.
-Number of Clusters:  15
-Silhouette Score:  0.5167888
-****************************************************************************************************
-Run 2 of 3
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/umap/umap_.py:1943: UserWarning: n_jobs value -1 overridden to 1 by setting random_state. Use no seed for parallelism.
-  warn(f"n_jobs value {self.n_jobs} overridden to 1 by setting random_state. Use no seed for parallelism.")
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>****************************************************************************************************
-****************************************************************************************************
-Hyperparameters:
-n_neighbors:  1000
-min_dist:  0.1
-metric:  euclidean
-n_components:  7
-Hopkin's Statistic = 0.003564701996774471
-Fail: Kmeans did not successfully cluster.
-DBSCAN
-Number of Clusters:  2
-Validity Index:  0.6410520870508877
-[0 1]
-Noise Ratio:  0.0
-****************************************************************************************************
-Run 3 of 3
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/Users/mikey/miniconda3/envs/usml_base_ds2/lib/python3.10/site-packages/umap/umap_.py:1943: UserWarning: n_jobs value -1 overridden to 1 by setting random_state. Use no seed for parallelism.
-  warn(f"n_jobs value {self.n_jobs} overridden to 1 by setting random_state. Use no seed for parallelism.")
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>****************************************************************************************************
-****************************************************************************************************
-Hyperparameters:
-n_neighbors:  1000
-min_dist:  0.5
-metric:  euclidean
-n_components:  7
-Hopkin's Statistic = 0.012625946062742487
-Fail: Kmeans did not successfully cluster.
-DBSCAN
-Number of Clusters:  44
-Validity Index:  0.006159406417206135
-[-1  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22
- 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43]
-Noise Ratio:  0.009624568363823378
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h2 id="All-Results">All Results<a class="anchor-link" href="#All-Results">¶</a></h2>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">results_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">ALL_RESULTS_FILENAME</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Filtered results dataframe saved at:"</span><span class="p">,</span> <span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">ALL_RESULTS_FILENAME</span><span class="p">)</span>
-
-<span class="c1"># display max rows</span>
-<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">'display.max_rows'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">'display.max_columns'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-<span class="n">results_df</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Filtered results dataframe saved at: /Users/mikey/LocalFiles/DS5230/final_project/DS5230-final/data/results/all_results_2024-04-1812:46:17.162801.csv
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[12]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>algo</th>
-<th>n_clusters_found</th>
-<th>n_clusters_db_score_is_min</th>
-<th>n_clusters_ch_score_is_max</th>
-<th>n_clusters_silhouette_score_is_max</th>
-<th>silhouette_score</th>
-<th>hopkins_statistic</th>
-<th>umap_n_neighbors</th>
-<th>umap_min_dist</th>
-<th>umap_metric</th>
-<th>umap_n_components</th>
-<th>trustworthiness</th>
-<th>eps</th>
-<th>dbscan_min_samples</th>
-<th>dbscan_metric</th>
-<th>validity_index</th>
-<th>noise_ratio</th>
-<th>cluster_labels</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>0</th>
-<td>k_means</td>
-<td>15</td>
-<td>15.0</td>
-<td>15.0</td>
-<td>15.0</td>
-<td>0.516789</td>
-<td>0.002807</td>
-<td>1000</td>
-<td>0.0</td>
-<td>euclidean</td>
-<td>7</td>
-<td>0.999931</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>[12, 7, 5, 5, 1, 5, 10, 12, 4, 8, 14, 11, 6, 0...</td>
-</tr>
-<tr>
-<th>1</th>
-<td>dbscan</td>
-<td>2</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>0.003565</td>
-<td>1000</td>
-<td>0.1</td>
-<td>euclidean</td>
-<td>7</td>
-<td>0.999926</td>
-<td>0.088648</td>
-<td>5.0</td>
-<td>chebyshev</td>
-<td>0.641052</td>
-<td>0.000000</td>
-<td>[0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, ...</td>
-</tr>
-<tr>
-<th>2</th>
-<td>dbscan</td>
-<td>44</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>0.012626</td>
-<td>1000</td>
-<td>0.5</td>
-<td>euclidean</td>
-<td>7</td>
-<td>0.998763</td>
-<td>0.147875</td>
-<td>5.0</td>
-<td>euclidean</td>
-<td>0.006159</td>
-<td>0.009625</td>
-<td>[0, 1, 0, 2, 3, 0, 4, 0, 5, 6, 7, 8, 9, 10, 11...</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># set max rows back to default</span>
-<span class="n">pd</span><span class="o">.</span><span class="n">reset_option</span><span class="p">(</span><span class="s1">'display.max_rows'</span><span class="p">)</span>
-<span class="n">pd</span><span class="o">.</span><span class="n">reset_option</span><span class="p">(</span><span class="s1">'display.max_columns'</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Get-n-Best-Results-(kmeans-and-DBSCAN)">Get n Best Results (kmeans and DBSCAN)<a class="anchor-link" href="#Get-n-Best-Results-(kmeans-and-DBSCAN)">¶</a></h3>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h4 id="Kmeans-Results">Kmeans Results<a class="anchor-link" href="#Kmeans-Results">¶</a></h4>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">n</span><span class="o">=</span><span class="mi">1</span>
-
-<span class="n">kmeans_results_df</span> <span class="o">=</span> <span class="n">results_df</span><span class="p">[</span><span class="n">results_df</span><span class="p">[</span><span class="s1">'algo'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'k_means'</span><span class="p">]</span>
-<span class="n">kmeans_results_df</span> <span class="o">=</span> <span class="n">kmeans_results_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">'silhouette_score'</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">best_kmeans_results_df</span> <span class="o">=</span> <span class="n">kmeans_results_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<span class="n">best_kmeans_results_df</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[14]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>algo</th>
-<th>n_clusters_found</th>
-<th>n_clusters_db_score_is_min</th>
-<th>n_clusters_ch_score_is_max</th>
-<th>n_clusters_silhouette_score_is_max</th>
-<th>silhouette_score</th>
-<th>hopkins_statistic</th>
-<th>umap_n_neighbors</th>
-<th>umap_min_dist</th>
-<th>umap_metric</th>
-<th>umap_n_components</th>
-<th>trustworthiness</th>
-<th>eps</th>
-<th>dbscan_min_samples</th>
-<th>dbscan_metric</th>
-<th>validity_index</th>
-<th>noise_ratio</th>
-<th>cluster_labels</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>0</th>
-<td>k_means</td>
-<td>15</td>
-<td>15.0</td>
-<td>15.0</td>
-<td>15.0</td>
-<td>0.516789</td>
-<td>0.002807</td>
-<td>1000</td>
-<td>0.0</td>
-<td>euclidean</td>
-<td>7</td>
-<td>0.999931</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>[12, 7, 5, 5, 1, 5, 10, 12, 4, 8, 14, 11, 6, 0...</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h4 id="DBSCAN-Results">DBSCAN Results<a class="anchor-link" href="#DBSCAN-Results">¶</a></h4>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [15]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">dbscan_results_df</span> <span class="o">=</span> <span class="n">results_df</span><span class="p">[</span><span class="n">results_df</span><span class="p">[</span><span class="s1">'algo'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'dbscan'</span><span class="p">]</span>
-<span class="n">dbscan_results_df</span> <span class="o">=</span> <span class="n">dbscan_results_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">'validity_index'</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">best_dbscan_results_df</span> <span class="o">=</span> <span class="n">dbscan_results_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<span class="n">best_dbscan_results_df</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[15]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>algo</th>
-<th>n_clusters_found</th>
-<th>n_clusters_db_score_is_min</th>
-<th>n_clusters_ch_score_is_max</th>
-<th>n_clusters_silhouette_score_is_max</th>
-<th>silhouette_score</th>
-<th>hopkins_statistic</th>
-<th>umap_n_neighbors</th>
-<th>umap_min_dist</th>
-<th>umap_metric</th>
-<th>umap_n_components</th>
-<th>trustworthiness</th>
-<th>eps</th>
-<th>dbscan_min_samples</th>
-<th>dbscan_metric</th>
-<th>validity_index</th>
-<th>noise_ratio</th>
-<th>cluster_labels</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>1</th>
-<td>dbscan</td>
-<td>2</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>0.003565</td>
-<td>1000</td>
-<td>0.1</td>
-<td>euclidean</td>
-<td>7</td>
-<td>0.999926</td>
-<td>0.088648</td>
-<td>5.0</td>
-<td>chebyshev</td>
-<td>0.641052</td>
-<td>0.0</td>
-<td>[0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, ...</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [16]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">filtered_results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">best_dbscan_results_df</span><span class="p">,</span> <span class="n">best_kmeans_results_df</span><span class="p">])</span>
-<span class="n">filtered_results_df</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[16]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>algo</th>
-<th>n_clusters_found</th>
-<th>n_clusters_db_score_is_min</th>
-<th>n_clusters_ch_score_is_max</th>
-<th>n_clusters_silhouette_score_is_max</th>
-<th>silhouette_score</th>
-<th>hopkins_statistic</th>
-<th>umap_n_neighbors</th>
-<th>umap_min_dist</th>
-<th>umap_metric</th>
-<th>umap_n_components</th>
-<th>trustworthiness</th>
-<th>eps</th>
-<th>dbscan_min_samples</th>
-<th>dbscan_metric</th>
-<th>validity_index</th>
-<th>noise_ratio</th>
-<th>cluster_labels</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>1</th>
-<td>dbscan</td>
-<td>2</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>0.003565</td>
-<td>1000</td>
-<td>0.1</td>
-<td>euclidean</td>
-<td>7</td>
-<td>0.999926</td>
-<td>0.088648</td>
-<td>5.0</td>
-<td>chebyshev</td>
-<td>0.641052</td>
-<td>0.0</td>
-<td>[0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, ...</td>
-</tr>
-<tr>
-<th>0</th>
-<td>k_means</td>
-<td>15</td>
-<td>15.0</td>
-<td>15.0</td>
-<td>15.0</td>
-<td>0.516789</td>
-<td>0.002807</td>
-<td>1000</td>
-<td>0.0</td>
-<td>euclidean</td>
-<td>7</td>
-<td>0.999931</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>[12, 7, 5, 5, 1, 5, 10, 12, 4, 8, 14, 11, 6, 0...</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [17]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">filtered_results_df</span><span class="p">[</span><span class="s1">'cluster_labels'</span><span class="p">]</span> <span class="o">=</span> <span class="n">filtered_results_df</span><span class="p">[</span><span class="s1">'cluster_labels'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s1">','</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<h3 id="Save-Filtered-Results-to-CSV">Save Filtered Results to CSV<a class="anchor-link" href="#Save-Filtered-Results-to-CSV">¶</a></h3>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [18]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">filtered_results_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">FILTERED_RESULTS_FILENAME</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Filtered results dataframe saved at:"</span><span class="p">,</span> <span class="n">DATA_PATH</span> <span class="o">+</span> <span class="n">FILTERED_RESULTS_FILENAME</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Filtered results dataframe saved at: /Users/mikey/LocalFiles/DS5230/final_project/DS5230-final/data/results/filtered_results_2024-04-1812:46:17.162817.csv
-</pre>
+<div class="jp-RenderedImage jp-OutputArea-output" tabindex="0">
+<img alt="No description has been provided for this image" class="" src="data:image/png;base64,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SdKBAwfUpUsXPfXUU7rrrrtqeterjDADAIANzZgxQ8uXL9fTTz+t3r17KzMzU3v27JEkhYeHa9WqVTr//PP1zTff6K677lJ4eLimTp3qWX7fvn36v//7P/3rX/9Sbm6uxowZo3HjxunVV1+tcLshISF69dVXddlll2nw4MG69tprNWLECPXv39+WQUYizAAAYDsnT57UP/7xDz377LMaNWqUJKlVq1bq3bu3JGnWrFmeeS+66CI9+OCDWrt2bakwU1BQoBdffFEXXnihJGnx4sUaMmSIFixYoObNm1e4/S5duuiRRx7RXXfdpVtvvVX79+/XW2+95eW99B7CDAAANpOeni6n06kBAwaUO/2f//ynFi1apH379ikvL09FRUWKiIgoNU9cXJwnyEhSz5495Xa7tXfv3rOGGUl68MEH9fbbb2vx4sV6//331aRJk3PbqRrEc2YAALCZ0NDQM077/PPP9Ze//EWDBg3Su+++q7S0NM2cOVOFhYUVrtPhcJT679lkZWVp79698vf31w8//FD54n2AMAMAgM20bt1aoaGh2rRpU5lpn376qVq0aKGZM2eqe/fuat26tX788ccy82VkZOinn37yDH/22Wfy8/NTmzZtKlXD6NGj1alTJ7300kuaOnWqvvvuu+rvUA3jMhMAoN76OWO/LbcREhKiadOmaerUqQoKClKvXr30yy+/6Ntvv1VCQoIyMjK0Zs0a9ejRQ+vXr9e6devKXceoUaP01FNPKTc3VxMmTNDNN99cqUtMS5Ys0Weffaavv/5asbGxev/99zV8+HB98cUXCgoKqvL+1DTCDACg3mnSpIlCw8L06rwptbK90LCwKt9zMnv2bAUEBOihhx7STz/9pJiYGN17770aM2aMHnjgAY0fP15Op1NDhgzR7NmzlZycXGr5hIQE3XDDDRo8eLCOHTumwYMHa+nSpWfd7p49ezRlyhStWLFCsbGxkn4NN507d9bs2bM1b968Ku1HbfBpmNmyZYuefPJJpaamKjMzU+vWrdN1113nmW5ZlubMmaNly5bp+PHjuuyyy7RkyRJ17GjPZwIAAMwQFxenPenptn6dgZ+fn2bOnKmZM2eWmTZ//nzNnz+/1LhJkyaVmW/s2LEaO3Zslbbbrl075f/uycgRERE6cOBAldZTm3waZk6dOqXOnTvrjjvu0I033lhm+vz587Vw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"/>
 </div>
 </div>
 </div>
@@ -8612,7 +8202,7 @@ Noise Ratio:  0.009624568363823378
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [19]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">finish</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -8632,7 +8222,7 @@ Noise Ratio:  0.009624568363823378
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Total Run Time(hh:mm.ss): 00:13.49
+<pre>Total Run Time(hh:mm.ss): 00:03.50
 </pre>
 </div>
 </div>
